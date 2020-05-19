@@ -13,11 +13,23 @@ struct node {
 }
 
 class component {
+  Rmyres
+  string component_type;
+  string component_name;
+  component_type="I"
+  
 
+  vector<node>* connected_terminals;
+     /* First term +ve node, Second term -ve node, we will specify other terms later when we come across more complicated components like MOSFET opamp*/
 }
 
-struct RCL
-	:public component
+component::component(string netlist_line)
+{
+    //constructing the component here
+}
+
+
+struct RCL:public component
 {
 	string component_type;
 	int value; // should be 0 for RCL, but dc or ac for voltage sources, or Opamp names?
@@ -47,3 +59,5 @@ struct dependent_source
 	node ctrl_node1;  // positive terminal
 	node ctrl_node2;  // negative terminal
 }
+
+#endif
