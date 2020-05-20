@@ -1,2 +1,2 @@
-language = "bash"
-run = ""
+language = "c++"
+run = "g++ -I eigen/ test_sandbox.cpp helper_functions.cpp data_structure.hpp -o compiled_test; ./compiled_test"
