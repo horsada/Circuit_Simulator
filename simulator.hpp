@@ -1,14 +1,15 @@
 #ifndef spice_hpp
 #define spice_hpp
 
-#include <iostream>
-#include <vector>
-#include <cmath>
-#include <string>
-#include <algorithm>
-#include <complex>
+#include "dependencies.hpp"
 
-using namespace std;
+/*///////////////////////
+  CORE DATA STRUCTURE
+///////////////////////*/
+
+// Forward declarations
+class node;
+class component;
 
 struct network {
   vector<component> network_components;
@@ -25,7 +26,7 @@ class component {
     string component_name;
     vector<node> connected_terminals;
 
-  virtual component(string netlist_line);
+  component(string netlist_line);
 };
 
 
@@ -80,5 +81,16 @@ class MOSFET
     float width;
 
   };
+
+/*/////////////////////////
+  FUNCTION DECLARATIONS
+/////////////////////////*/
+
+// This functions solves a matrix equation Ax=B (Gv=i)
+// It takes any-sized float matrix A and B as an input and computes x.
+MatrixXf solve_matrix_equation(MatrixXf A, MatrixXf B);
+
+// This function takes in a string suffix value (7.2k, 25m, 15M) and converts to a double.
+double suffix_parser(string prefix_value);
 
 #endif
