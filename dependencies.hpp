@@ -16,9 +16,9 @@
 // Mathematical Helpers
 #include <cmath>
 #include <algorithm>
-//#include <Eigen/Dense> // This must be included in the compile path (g++ -I eigen/ ...)
+#include <Eigen/Dense> // This must be included in the compile path (g++ -I eigen/ ...)
 
 using namespace std;
-//using namespace Eigen;
+using namespace Eigen;
 
 #endif

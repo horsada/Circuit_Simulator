@@ -4,7 +4,7 @@
 //Note: strtol() can not be used for semiconductor devices or dependent sources because they would result in coefficients of functions instead of known values.
 
 //This function takes a term resulted from nodal analysis to extract the coefficient of one term from NA.
-complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodeinput2)
+complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodeinput2, float angular_fre)
 {
 	complex<float> total_impedance;
 	total_impedance = 0;
@@ -15,7 +15,7 @@ complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodei
 			if(tellname(nodeinput1.connected_components[i]) != "voltage_dependent_source" &&
 			   tellname(nodeinput1.connected_components[i]) != "current_dependent_source" &&
 			   tellname(nodeinput1.connected_components[i]) != "independent_source"){
-					total_impedance += impedance(nodeinput1.connected_components[i]);
+					total_impedance += get_impedance(nodeinput1.connected_components[i], angular_fre);
 			//function impedance is not written yet. Also, diode's impedance when not conducting should be 0 in this case.
 			}
 		}
@@ -43,7 +43,7 @@ complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodei
 				if(tellname(nodeinput1.connected_components[i]) != "voltage_dependent_source" &&
 				   tellname(nodeinput1.connected_components[i]) != "current_dependent_source" &&
 				   tellname(nodeinput1.connected_components[i]) != "independent_source"){
-						total_impedance += impedance(common_components_between_node[i]);
+						total_impedance += get_impedance(common_components_between_node[i], angular_fre);
 				}
 			}
 		}
@@ -60,7 +60,7 @@ complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodei
 				if(tellname(nodeinput1.connected_components[i]) != "voltage_dependent_source" &&
 			       tellname(nodeinput1.connected_components[i]) != "current_dependent_source" &&
 	             	tellname(nodeinput1.connected_components[i]) != "independent_source"){
-					total_impedance += impedance(common_components_between_node[i]);
+					total_impedance += get_impedance(common_components_between_node[i], angular_fre);
 				}
 			}
 		}
