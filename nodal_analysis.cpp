@@ -1,9 +1,6 @@
 #include "dependencies.hpp"
 #include "simulator.hpp"
-//use strtol() to convert the textual representation into a number. This requires us to have the terms resulted from Nodal analysis in the form of  number_nodename.
-//Note: strtol() can not be used for semiconductor devices or dependent sources because they would result in coefficients of functions instead of known values.
 
-//This function takes a term resulted from nodal analysis to extract the coefficient of one term from NA.
 complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodeinput2, float angular_fre)
 {
 	complex<float> total_impedance;
