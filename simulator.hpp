@@ -11,7 +11,9 @@
 class node;
 class component;
 
-struct network {
+struct network_simulation {
+  double stop_time; // Duration of simulation
+  double timestep; // Temporal Resolution of simulation
   vector<component> network_components;
   vector<node> network_nodes;
 };
@@ -70,11 +72,11 @@ class L: public component
 	}
 };
 
-class independent_source 
+class independent_source
 	:public component
 {
 	string waveform_type; //ac or dc (we might need to add member variables)
-	vector<float> values; // contains all 
+	vector<float> values; // contains all
 	float output_values;
 	string tellname(){
 		return "independent_source";
@@ -105,7 +107,7 @@ class voltage_dependent_source
 //check how temperature affects the parameters
 class diode
   :public component
-  { 
+  {
     string diodename;
 	string tellname(){
 		return "diode";
@@ -135,17 +137,20 @@ class MOSFET
 
 /*/////////////////////////
   FUNCTION DECLARATIONS
-/////////////////////////1*/
+/////////////////////////*/
 
 // This functions solves a matrix equation Ax=B (Gv=i)
 // It takes any-sized float matrix A and B as an input and computes x.
 MatrixXf solve_matrix_equation(MatrixXf A, MatrixXf B);
 
-// This function takes in a string suffix value (7.2k, 25m, 15M) and converts to a double.
+// This function takes in a string suffix value (7.2k, 25m, 15Meg) and converts to a double.
 double suffix_parser(string prefix_value);
 
+// Takes a netlist line and processes it
+int parse_netlist_line(network_simulation netlist_network, string netlist_line);
+
 //This get_impedance function is overloaded to return the impedance of several different component
-complex<float> get_impedance(R r, float angular_fre);
+complex<float> get_impedance(R r, float angular_fre); // angular_fre necessary here?
 complex<float> get_impedance(C c, float angular_fre);
 complex<float> get_impedance(L l, float angular_fre);
 complex<float> get_impedance(diode d);
@@ -153,5 +158,8 @@ complex<float> get_impedance(BJT b);
 complex<float> get_impedance(MOSFET m);
 
 //This function takes two nodes and return the conductance term in the conductance matrix.
-complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodeinput2, float angular_fre);
+double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2);
+
+// Sums all the conductances of a vector of components
+double sum_conductance(vector<component> components);
 #endif

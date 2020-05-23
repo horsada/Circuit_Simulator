@@ -1,68 +1,35 @@
 #include "dependencies.hpp"
 #include "simulator.hpp"
 
-complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodeinput2, float angular_fre)
-{
-	complex<float> total_impedance;
-	total_impedance = 0;
-	//when G11,G22,G33 and etc
-	if(nodeinput1.node_index == nodeinput2.node_index){
-		if(int i = 0; i < nodeinput1.connected_components.size(); i++)
-		{
-			if(tellname(nodeinput1.connected_components[i]) != "voltage_dependent_source" &&
-			   tellname(nodeinput1.connected_components[i]) != "current_dependent_source" &&
-			   tellname(nodeinput1.connected_components[i]) != "independent_source"){
-					 total_impedance += get_impedance(nodeinput1.connected_components[i], angular_fre);
-			//function impedance is not written yet. Also, diode's impedance when not conducting should be 0 in this case.
-			}
-		}
-		complex<float> total_conductance = pow(total_impedance,-1);
-		return total_conductance;
+double sum_conductance(vector<component> components) {
+	double total_conductance;
+	total_conductance = 0.0;
+	for(int i = 0; i < components.size(); i++) {
+		total_conductance += (1/get_impedance(components[i]);
 	}
-	//when G12.G21.G13,G31 and etc.
-	if(nodeinput1.node_index != nodeinput2.node_index){
-
-		bool first_is_larger_or_equal_in_size;
-		if(nodeinput1.connected_components.size()>=nodeinput2.connected_components.size()){
-			first_is_larger_or_equal_in_size = 1;
-		}else{
-			first_is_larger_or_equal_in_size = 0;
-		}
-
-		if(first_is_larger_or_equal_in_size == 1){
-			vector<complex<float>> common_components_between_node(nodeinput1.connected_components.size());
-			vector<complex<float>>::iterator it;
-			sort(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end());
-			sort(nodeinput2.connected_components.begin(),nodeinput2.connected_components.end());
-			it = set_intersection(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end(),nodeinput2.connected_components.begin(),nodeinput2.connected_components.end(),common_components_between_node.begin());
-			common_components_between_node.resize(it-common_components_between_node.begin());
-			if(int i =0; i< common_components_between_node.size(); i++){
-				if(tellname(nodeinput1.connected_components[i]) != "voltage_dependent_source" &&
-				   tellname(nodeinput1.connected_components[i]) != "current_dependent_source" &&
-				   tellname(nodeinput1.connected_components[i]) != "independent_source"){
-						total_impedance += get_impedance(common_components_between_node[i], angular_fre);
-				}
-			}
-		}
-
-
-		if(first_is_larger_or_equal_in_size == 0){
-			vector<complex<float>> common_components_between_node(nodeinput2.connected_components.size());
-			vector<complex<float>>::iterator it;
-			sort(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end());
-			sort(nodeinput2.connected_components.begin(),nodeinput2.connected_components.end());
-			it = set_intersection(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end(),nodeinput2.connected_components.begin(),nodeinput2.connected_components.end(),common_components_between_node.begin());
-			common_components_between_node.resize(it-common_components_between_node.begin());
-			if(int i =0; i< common_components_between_node.size(); i++){
-				if(tellname(nodeinput1.connected_components[i]) != "voltage_dependent_source" &&
-			       tellname(nodeinput1.connected_components[i]) != "current_dependent_source" &&
-	             	tellname(nodeinput1.connected_components[i]) != "independent_source"){
-					total_impedance += get_impedance(common_components_between_node[i], angular_fre);
-				}
-			}
-		}
-	complex<float> total_conductance = pow(total_impedance,-1);
 	return total_conductance;
+}
+
+double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2)
+{
+
+	// For diagonal conductance matrix entries (G11 ,G22, G33 ...)
+	if(nodeinput1 == nodeinput2){
+		return sum_conductance(nodeinput1.connected_components);
 	}
 
+	// For all other conductance matrix entries (G12, G21, G13, G31 ...)
+	else if (nodeinput1 != nodeinput2) {
+
+		// To find the common intersection, the vectors need to be sorted
+		sort(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end());
+		sort(nodeinput2.connected_components.begin(),nodeinput2.connected_components.end());
+
+		vector<component> common_components_between_node(nodeinput1.connected_components.size()+nodeinput2.connected_components.size());
+		vector<component>::iterator it;
+		it = set_intersection(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end(),nodeinput2.connected_components.begin(),nodeinput2.connected_components.end(),common_components_between_node.begin());
+		common_components_between_node.resize(it-common_components_between_node.begin());
+		return sum_conductance(common_components_between_node);
+
+  }
 }

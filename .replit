@@ -1,2 +1,2 @@
 language = "c++"
-run = "g++ -I eigen/ helper_functions.cpp simulator.hpp test_sandbox.cpp -o compiled_files/compiled_test && compiled_files/compiled_test"
+run = "g++ -I eigen/ helper_functions.cpp test_sandbox.cpp netlist_parser.cpp -o compiled_files/compiled_test && compiled_files/compiled_test"

@@ -8,5 +8,7 @@ using namespace Eigen;
 
 int main()
 {
-    cout << suffix_parser("") << endl;
+    //cout << suffix_parser("") << endl;
+    network_simulation sim;
+    cout << parse_netlist_line(sim, ".tran 0 10ms 0 1us");
 }
