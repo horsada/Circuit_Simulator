@@ -12,7 +12,7 @@ complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodei
 			if(tellname(nodeinput1.connected_components[i]) != "voltage_dependent_source" &&
 			   tellname(nodeinput1.connected_components[i]) != "current_dependent_source" &&
 			   tellname(nodeinput1.connected_components[i]) != "independent_source"){
-					total_impedance += get_impedance(nodeinput1.connected_components[i], angular_fre);
+					 total_impedance += get_impedance(nodeinput1.connected_components[i], angular_fre);
 			//function impedance is not written yet. Also, diode's impedance when not conducting should be 0 in this case.
 			}
 		}
@@ -21,7 +21,7 @@ complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodei
 	}
 	//when G12.G21.G13,G31 and etc.
 	if(nodeinput1.node_index != nodeinput2.node_index){
-		
+
 		bool first_is_larger_or_equal_in_size;
 		if(nodeinput1.connected_components.size()>=nodeinput2.connected_components.size()){
 			first_is_larger_or_equal_in_size = 1;
@@ -30,8 +30,8 @@ complex<float> write_conductance_terms_knowing_nodes(node nodeinput1, node nodei
 		}
 
 		if(first_is_larger_or_equal_in_size == 1){
-			vector<complex<float>> common_components_between_node(nodeinput1.connected_components.size()); 
-			vector<complex<float>>::iterator it;	
+			vector<complex<float>> common_components_between_node(nodeinput1.connected_components.size());
+			vector<complex<float>>::iterator it;
 			sort(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end());
 			sort(nodeinput2.connected_components.begin(),nodeinput2.connected_components.end());
 			it = set_intersection(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end(),nodeinput2.connected_components.begin(),nodeinput2.connected_components.end(),common_components_between_node.begin());

@@ -6,50 +6,32 @@ MatrixXf solve_matrix_equation(MatrixXf A, MatrixXf B) {
   return x;
 }
 
+// Testing needed
 double suffix_parser(string input) {
-  // Categorising the format of the suffix. (1000, K, E+03, Kilo)
+  // reduced spice format takes multiplier or normal float as input
 
+  // Input format examples: 1m, 0.1 ...
   // 1. Check if input already is a number
-  regex formatted_number("[0-9]+([.][0-9]+)?");
-  if (regex_match(input, formatted_number)) {
+  regex pure_number("[0-9]+([.][0-9]+)?");
+  if (regex_match(input, pure_number)) {
+    cout << "No suffix detected." << endl;
     return stod(input);
   }
 
-  // 2.check for regular metric suffix
-  regex metric_suffix("[0-9]+([.][0-9]+)?[TGXKMUNPF]");
-  char last_char = input.back();
-  /*
-  if (regex_match(input, formatted_number)) {
-    if(last_char=="T") {
-      return stod(input.substr(0, input.size()-1))*100;
-    }
-    else if(last_char=="T") {
-      
-    }
-    else if(last_char=="G") {
-      
-    }
-    else if(last_char=="X") {
-      
-    }
-    else if(last_char=="K") {
-      
-    }
-    else if(last_char=="M") {
-      
-    }
-    else if(last_char=="U") {
-      
-    }
-    else if(last_char=="N") {
-      
-    }
-    else if(last_char=="P") {
-      
-    }
-    else if(last_char=="F") {
-      
-    }
-  }
-  */
+  cout << "TESTIN'" << endl;
+  // 2. Check for metric suffix
+  regex metric_suffix("[0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)");
+  if (regex_match(input, metric_suffix)) {
+    cout << "Metric suffix detected." << endl;
+    if(input.find("p") != string::npos) { return stod(input.substr(0, input.size()-1))*1e-12; }
+    if(input.find("n") != string::npos) { return stod(input.substr(0, input.size()-1))*1e-9; }
+    if(input.find("u") != string::npos) { return stod(input.substr(0, input.size()-1))*1e-6; }
+    if(input.find("m") != string::npos) { return stod(input.substr(0, input.size()-1))*1e-3; }
+    if(input.find("k") != string::npos) { return stod(input.substr(0, input.size()-1))*1e3; }
+    if(input.find("Meg") != string::npos) { return stod(input.substr(0, input.size()-1))*1e6; }
+    if(input.find("G") != string::npos) { return stod(input.substr(0, input.size()-1))*1e9; }
+}
+
+  // No matching case.
+  // assert(1 && "Invalid number formatting in netlist."); // Invalid input format
 }
