@@ -18,7 +18,6 @@ double suffix_parser(string input) {
     return stod(input);
   }
 
-  cout << "TESTIN'" << endl;
   // 2. Check for metric suffix
   regex metric_suffix("[0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)");
   if (regex_match(input, metric_suffix)) {
