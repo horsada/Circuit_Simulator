@@ -2,10 +2,10 @@
 #define spice_hpp
 
 #include "dependencies.hpp"
-#include "complex"
+
 /*///////////////////////
   CORE DATA STRUCTURE
-//////////////////////1*/
+///////////////////////*/
 
 // Forward declarations
 class node;
@@ -18,90 +18,50 @@ struct network_simulation {
   vector<node> network_nodes;
 };
 
-struct node {
+class node{
+  public:
 	string node_index;
 	vector<component> connected_components;
+  node(){};
 };
 
 class component {
   public:
+    
+    component(){};
     string component_name;
     vector<node> connected_terminals;
+    component(string netlist_line);
+    virtual double read_value();
 
-  component(string netlist_line);
-    virtual string tellname() =0;
 };
-
 
 class R: public component
 {
-	protected:
-	float component_value;
-	public:
-	string tellname(){
-		return "R";
-	}
-	float read_value(){
-		return component_value;
-	}
+  protected:
+    double component_value;
+  public:
+    R(double value){
+      component_value = value;
+    };
+    double read_value(){
+      return component_value;
+    }
 };
+
 
 class C: public component
 {
 	protected:
-	float component_value;
-	public:
-	string tellname(){
-		return "C";
-	}
-	float read_value(){
-		return component_value;
-	}
+	double component_value;
 };
 
 class L: public component
 {
 	protected:
-	float component_value;
-	public:
-	string tellname(){
-		return "L";
-	}
-	float read_value(){
-		return component_value;
-	}
+	double component_value;
 };
 
-class independent_source
-	:public component
-{
-	string waveform_type; //ac or dc (we might need to add member variables)
-	vector<float> values; // contains all
-	float output_values;
-	string tellname(){
-		return "independent_source";
-	}
-};
-
-class current_dependent_source
-  :public component
-  {
-    component *current_controller;
-    float constant_factor;
-	string tellname(){
-		return "current_dependent_source";
-	}
-  };
-
-class voltage_dependent_source
-  :public component
-  {
-    vector<node *> control_nodes;
-    float constant_factor;
-	string tellname(){
-		return "voltage_dependent_source";
-	}
-  };
 
 
 //check how temperature affects the parameters
@@ -109,9 +69,6 @@ class diode
   :public component
   {
     string diodename;
-	string tellname(){
-		return "diode";
-	}
   };
 
 class BJT
@@ -119,9 +76,6 @@ class BJT
   {
    string BJT_name;
    float beta;
-   string tellname(){
-	   return "BJT";
-   }
   };
 
 class MOSFET
@@ -130,9 +84,6 @@ class MOSFET
     string MOSFETname;
     float length;
     float width;
-	string tellname(){
-		return "MOSFET";
-	}
   };
 
 /*/////////////////////////
@@ -150,16 +101,17 @@ double suffix_parser(string prefix_value);
 int parse_netlist_line(network_simulation netlist_network, string netlist_line);
 
 //This get_impedance function is overloaded to return the impedance of several different component
-complex<float> get_impedance(R r, float angular_fre); // angular_fre necessary here?
-complex<float> get_impedance(C c, float angular_fre);
-complex<float> get_impedance(L l, float angular_fre);
-complex<float> get_impedance(diode d);
-complex<float> get_impedance(BJT b);
-complex<float> get_impedance(MOSFET m);
+double get_impedance(R r); 
+//double get_impedance(C c);
+//double get_impedance(L l);
+//double get_impedance(diode d);
+//double get_impedance(BJT b);
+//double get_impedance(MOSFET m);
 
 //This function takes two nodes and return the conductance term in the conductance matrix.
 double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2);
 
 // Sums all the conductances of a vector of components
 double sum_conductance(vector<component> components);
+
 #endif
