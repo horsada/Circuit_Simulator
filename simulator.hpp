@@ -10,6 +10,7 @@
 // Forward declarations
 class node;
 class component;
+class circuit;
 
 struct network_simulation {
   double stop_time; // Duration of simulation
@@ -18,27 +19,36 @@ struct network_simulation {
   vector<node> network_nodes;
 };
 
+class circuit
+{
+public:
+  vector<node> nodes;
+};
+
 class node{
   public:
-	string node_index;
+	int index; // changed to int for read_file.cpp
 	vector<component> connected_components;
   node(){};
+  node(int node_index)
+  {
+    index = node_index;
+  }
 };
 
 class component {
   public:
-    
+
     component(){};
     string component_name;
     vector<node> connected_terminals;
     component(string netlist_line);
     virtual double read_value();
-
 };
 
 class R: public component
 {
-  protected:
+private:
     double component_value;
   public:
     R(double value){
@@ -47,19 +57,40 @@ class R: public component
     double read_value(){
       return component_value;
     }
+
+    // Adam - for read_file.cpp
+    R(string device_name, double value)
+    {
+      component_name = device_name;
+      component_value = value;
+    }
 };
 
 
 class C: public component
 {
-	protected:
+private:
 	double component_value;
+public:
+  // Adam - for read_file.cpp
+  C(string device_name, double value)
+  {
+    component_name = device_name;
+    component_value = value;
+  }
 };
 
 class L: public component
 {
-	protected:
+private:
 	double component_value;
+public:
+  // Adam - for read_file.cpp
+  L(string device_name, double value)
+  {
+    component_name = device_name;
+    component_value = value;
+  }
 };
 
 
@@ -92,7 +123,7 @@ class MOSFET
 
 // This functions solves a matrix equation Ax=B (Gv=i)
 // It takes any-sized float matrix A and B as an input and computes x.
-MatrixXf solve_matrix_equation(MatrixXf A, MatrixXf B);
+// MatrixXf solve_matrix_equation(MatrixXf A, MatrixXf B);
 
 // This function takes in a string suffix value (7.2k, 25m, 15Meg) and converts to a double.
 double suffix_parser(string prefix_value);
@@ -101,7 +132,7 @@ double suffix_parser(string prefix_value);
 int parse_netlist_line(network_simulation netlist_network, string netlist_line);
 
 //This get_impedance function is overloaded to return the impedance of several different component
-double get_impedance(R r); 
+double get_impedance(R r);
 //double get_impedance(C c);
 //double get_impedance(L l);
 //double get_impedance(diode d);
