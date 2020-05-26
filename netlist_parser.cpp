@@ -3,6 +3,7 @@
 
 // Returns status code of parse operation: 0-success; 1-end_of_file; 2-parser_error;
 int parse_netlist_line(network_simulation netlist_network, string netlist_line) {
+  cout << "netlist_parser_here" << endl;
   // REGEX is used to verify and classify the netlist line
   // There are different types of lines in reduced spice format
   //1:Component => <designator> <node0> <node1> [<node 2] <value>
@@ -32,8 +33,8 @@ int parse_netlist_line(network_simulation netlist_network, string netlist_line) 
     regex time_values(" 0 (.*?)s"); // Matches e.g. " 0 10ms", need substrings (3, end-1)
     regex_search(netlist_line, matches, time_values);
     assert(matches.size()==2); // There should be two matches in the line
-    netlist_stop_time = suffix_parser(str(matches[0]).substr(3, matches[0].length()-4));
-    netlist_timestep = suffix_parser(str(matches[1]).substr(3, matches[1].length()-4));
+    //netlist_stop_time = suffix_parser(matches[0].substr(3, matches[0].length()-4));
+    //netlist_timestep = suffix_parser(matches[1].substr(3, matches[1].length()-4));
     cout << "netlist_stop_time: " << netlist_stop_time << endl;
     cout << "netlist_timestep: " << netlist_timestep << endl;
     return 0;
