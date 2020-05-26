@@ -19,75 +19,63 @@ struct network_simulation {
   vector<node> network_nodes;
 };
 
-class circuit
-{
-public:
-  vector<node> nodes;
+class circuit {
+  public:
+    vector<node> nodes;
 };
 
-class node{
+class node {
   public:
-	int index; // changed to int for read_file.cpp
-	vector<component> connected_components;
-  node(){};
-  node(int node_index)
-  {
-    index = node_index;
-  }
+  	int index; // changed to int for read_file.cpp
+  	vector<component> connected_components;
+    node(){};
+    node(int node_index)
+    {
+      index = node_index;
+    }
 };
 
 class component {
   public:
-
-    component(){};
     string component_name;
     vector<node> connected_terminals;
-    component(string netlist_line);
-    virtual double read_value();
+    virtual double read_value()=0;
 };
 
-class R: public component
-{
-private:
-    double component_value;
+class R: public component {
+  private:
+      double component_value;
   public:
-    R(double value){
-      component_value = value;
-    };
+
     double read_value(){
       return component_value;
     }
 
     // Adam - for read_file.cpp
-    R(string device_name, double value)
-    {
+    R(string device_name, double value) {
       component_name = device_name;
       component_value = value;
     }
 };
 
 
-class C: public component
-{
+class C: public component {
 private:
 	double component_value;
 public:
   // Adam - for read_file.cpp
-  C(string device_name, double value)
-  {
+  C(string device_name, double value) {
     component_name = device_name;
     component_value = value;
   }
 };
 
-class L: public component
-{
+class L: public component {
 private:
 	double component_value;
 public:
   // Adam - for read_file.cpp
-  L(string device_name, double value)
-  {
+  L(string device_name, double value) {
     component_name = device_name;
     component_value = value;
   }
@@ -96,26 +84,20 @@ public:
 
 
 //check how temperature affects the parameters
-class diode
-  :public component
-  {
+class diode :public component {
     string diodename;
-  };
+};
 
-class BJT
-  :public component
-  {
+class BJT:public component {
    string BJT_name;
    float beta;
-  };
+};
 
-class MOSFET
-  :public component
-  {
+class MOSFET :public component {
     string MOSFETname;
     float length;
     float width;
-  };
+};
 
 /*/////////////////////////
   FUNCTION DECLARATIONS
