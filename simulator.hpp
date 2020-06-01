@@ -10,23 +10,19 @@
 // Forward declarations
 class node;
 class component;
-class circuit;
 
-struct network_simulation {
+class network_simulation {
   double stop_time; // Duration of simulation
   double timestep; // Temporal Resolution of simulation
   vector<component> network_components;
   vector<node> network_nodes;
-};
-
-class circuit {
-  public:
-    vector<node> nodes;
+  vector<independent_v_source> v_sources;
 };
 
 class node {
   public:
   	int index; // changed to int for read_file.cpp
+    double node;
   	vector<component> connected_components;
     node(){};
     node(int node_index)
@@ -39,14 +35,13 @@ class component {
   public:
     string component_name;
     vector<node> connected_terminals;
-    virtual double read_value()=0;
+    virtual double read_value() =0;
 };
 
 class R: public component {
   private:
       double component_value;
   public:
-
     double read_value(){
       return component_value;
     }

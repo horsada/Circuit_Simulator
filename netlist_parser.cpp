@@ -19,7 +19,6 @@ int parse_netlist_line(network_simulation netlist_network, string netlist_line) 
   if (regex_match(netlist_line, reduced_spice_format_component)) {
     // Line is a component
     cout << "end of netlist" << endl;
-
     return 0;
   }
   else if (regex_match(netlist_line, reduced_spice_format_comment)) {

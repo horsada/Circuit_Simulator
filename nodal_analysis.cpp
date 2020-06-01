@@ -53,3 +53,38 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2)
 
   }*/
 }
+
+matrixXd A_inverse inverse_matrix(matrixXd A)
+{
+	return A.inverse;
+}
+
+// inspiration taken from swarthmore.edu
+void create_conductance_matrix(network_simulation A, matrixXd G, matrixXd B, matrixXd C, matrixXd D)
+{
+	MatrixXd A(2,2);
+	A(0,0) = G;
+	A(0,1) = B;
+	A(1,0) = C;
+	A(0,1) = D;
+}
+
+void create_G_matrix(network_simulation A)
+{
+
+}
+
+void create_B_matrix(network_simulation A)
+{
+
+}
+
+void create_C_matrix(network_simulation C)
+{
+
+}
+
+void create_D_matrix(network_simulation A)
+{
+	
+}
