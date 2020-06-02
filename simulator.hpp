@@ -5,7 +5,7 @@
 
 /*///////////////////////
   CORE DATA STRUCTURE
-///////////////////////*/
+///////////////////////-*/
 
 // Forward declarations
 class node;
@@ -96,7 +96,7 @@ class MOSFET :public component {
 
 /*/////////////////////////
   FUNCTION DECLARATIONS
-/////////////////////////*/
+/////////////////////////-*/
 
 // This functions solves a matrix equation Ax=B (Gv=i)
 // It takes any-sized float matrix A and B as an input and computes x.
