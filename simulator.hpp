@@ -122,4 +122,6 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2);
 // Sums all the conductances of a vector of components
 double sum_conductance(vector<component> components);
 
+bool is_a_node_voltage_known(node input, node reference_node);
+
 #endif
