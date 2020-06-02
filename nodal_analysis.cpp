@@ -91,3 +91,30 @@ void create_D_matrix(network_simulation A)
 {
 
 }
+
+
+bool is_a_node_voltage_known(node input, node reference_node){
+// check if a node is connected to any voltage sources, if so, chekc whether the other node of the voltage source is the reference node, or connected to another voltage source.
+	for(int i = 0 ; i < input.connected_components.size(); i++){
+		if(input.connected_components[i].component_name == 'V'){
+			if(input.connected_components[i].connected_terminals[0] == reference_node){
+				return true;
+			}
+			if(input.connected_components[i].connected_terminals[0] == input){
+				if(input.connected_components[i].connected_terminals[1] == reference_node){
+					return true;
+				}else{
+					bool a;
+					a = is_a_node_voltage_known(input.connected_components[i].connected_terminals[1], reference_node);
+		            }
+			}
+		}
+	}
+	return false;
+}
+		
+			
+
+
+
+}

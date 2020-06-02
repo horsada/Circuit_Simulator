@@ -5,7 +5,7 @@
 
 /*///////////////////////
   CORE DATA STRUCTURE
-///////////////////////*/
+///////////////////////-*/
 
 // Forward declarations
 class node;
@@ -97,7 +97,7 @@ class MOSFET :public component {
 
 /*/////////////////////////
   FUNCTION DECLARATIONS
-/////////////////////////*/
+/////////////////////////-*/
 
 // This functions solves a matrix equation Ax=B (Gv=i)
 // It takes any-sized float matrix A and B as an input and computes x.
@@ -122,5 +122,7 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2);
 
 // Sums all the conductances of a vector of components
 double sum_conductance(vector<component> components);
+
+bool is_a_node_voltage_known(node input, node reference_node);
 
 #endif
