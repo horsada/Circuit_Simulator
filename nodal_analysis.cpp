@@ -68,28 +68,83 @@ void create_conductance_matrix(network_simulation A, matrixXd G, matrixXd B, mat
 	A(1,0) = C;
 	A(0,1) = D;
 }
-
+/* For the below function to work, we need:
+- Order the vector network_nodes in order of nodes(0, 1, 2 etc.)
+*/
 void create_G_matrix(network_simulation A)
 {
-	MatrixXd G(A.network_nodes.size(), A.network_nodes.size());
-	MatrixXd diagonal(0,A.netword_nodes.size());
 
+	//diagonal part of matrix G
+	MatrixXd G(A.network_nodes.size(), A.network_nodes.size());
+	for(int i=0; i<G.columns(); i++)
+	{
+		for(int j=0;j<G.rows(); j++)
+		{
+			if(i == j)
+			{
+				G(i,j) = A.network_nodes[i].sum_of_conductances;
+			}
+			else()
+			{
+				for(int k=0; k<A.network_nodes.size(); k++)
+				{
+					G(i,j) = -(A.network_nodes[k].sum_of_conductances)
+				}
+			}
+		}
+	}
 
 }
 
 void create_B_matrix(network_simulation A)
 {
-	
+	int count;
+	for(int i=; i<A.network_components.size(); i++)
+	{
+		if(A.network_components[i] == **voltage source**)
+		{
+			count++;
+		}
+	}
+	MatrixXd B(A.network_nodes.size(),count);
+	for(int i=0; i<B.columns(); i++)
+	{
+		for(int j=0; i<B.rows(); j++)
+		{
+			for(int k=0; k<v_sources.size(); k++)
+			{
+				if(i == v_sources[k].positive_node)
+				{
+					B(i,j) = 1;
+				}
+				else if(i == v.sources[k].negative_node)
+				{
+					B(i,j) == -1;
+				}
+				else()
+				{
+					B(i,j) == 0;
+				}
+			}
+		}
+	}
 }
 
-void create_C_matrix(network_simulation C)
+void create_C_matrix(MatrixXd B)
 {
-
+	MatrixXd C = B.transpose();
 }
 
 void create_D_matrix(network_simulation A)
 {
-
+	int count_v_sources;
+	for(int i=; i<A.network_components.size(); i++)
+	{
+		if(A.network_components[i] == **voltage source**)
+		{
+			count++;
+		}
+	MatrixXd = (count,count);
 }
 
 
@@ -112,9 +167,5 @@ bool is_a_node_voltage_known(node input, node reference_node){
 	}
 	return false;
 }
-		
-			
-
-
 
 }

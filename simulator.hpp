@@ -22,13 +22,17 @@ class network_simulation {
 class node {
   public:
   	int index; // changed to int for read_file.cpp
-    double node;
+    double sum_of_conductances;
     vector<double> conductances;
   	vector<component> connected_components;
     node(){};
     node(int node_index)
     {
       index = node_index;
+    }
+    void sum_of_conductances()
+    {
+      // assign member variable sum_of_conductances using this function
     }
 };
 
@@ -37,6 +41,8 @@ class component {
     string component_name;
     vector<node> connected_terminals;
     virtual double read_value() =0;
+    int positive_node;
+    int negative_node;
 };
 
 class R: public component {
@@ -94,6 +100,12 @@ class MOSFET :public component {
     float length;
     float width;
 };
+
+class independent_v_source : public components
+{
+  double value;
+  double frequency;
+}
 
 /*/////////////////////////
   FUNCTION DECLARATIONS

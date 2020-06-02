@@ -15,6 +15,7 @@
 #include <fstream>
 #include <sstream>
 #include <cassert>
+#include <type_traits>
 // Mathematical Helpers
 #include <cmath>
 #include <algorithm>
