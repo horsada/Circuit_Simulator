@@ -71,12 +71,15 @@ void create_conductance_matrix(network_simulation A, matrixXd G, matrixXd B, mat
 
 void create_G_matrix(network_simulation A)
 {
+	MatrixXd G(A.network_nodes.size(), A.network_nodes.size());
+	MatrixXd diagonal(0,A.netword_nodes.size());
+
 
 }
 
 void create_B_matrix(network_simulation A)
 {
-
+	
 }
 
 void create_C_matrix(network_simulation C)
@@ -86,5 +89,5 @@ void create_C_matrix(network_simulation C)
 
 void create_D_matrix(network_simulation A)
 {
-	
+
 }

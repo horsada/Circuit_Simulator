@@ -23,6 +23,7 @@ class node {
   public:
   	int index; // changed to int for read_file.cpp
     double node;
+    vector<double> conductances;
   	vector<component> connected_components;
     node(){};
     node(int node_index)
