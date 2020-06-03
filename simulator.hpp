@@ -10,6 +10,7 @@
 // Forward declarations
 class node;
 class component;
+class independent_v_source;
 
 class network_simulation {
   double stop_time; // Duration of simulation
@@ -25,12 +26,12 @@ class node {
     double sum_of_conductances;
     vector<double> conductances;
   	vector<component> connected_components;
-    node(){};
+    ~node(){};
     node(int node_index)
     {
       index = node_index;
     }
-    void sum_of_conductances()
+    void set_sum_of_conductances()
     {
       // assign member variable sum_of_conductances using this function
     }
@@ -40,9 +41,10 @@ class component {
   public:
     string component_name;
     vector<node> connected_terminals;
-    virtual double read_value() =0;
     int positive_node;
     int negative_node;
+    virtual ~component(){};
+    virtual double read_value() { return 0.0; }; // This needs to be implemented everywhere in order to be pure-virtual
 };
 
 class R: public component {
@@ -70,6 +72,9 @@ public:
     component_name = device_name;
     component_value = value;
   }
+  double read_value(){
+    return component_value;
+  }
 };
 
 class L: public component {
@@ -81,31 +86,34 @@ public:
     component_name = device_name;
     component_value = value;
   }
+  double read_value(){
+    return component_value;
+  }
 };
 
 
 
 //check how temperature affects the parameters
-class diode :public component {
+class diode: public component {
     string diodename;
 };
 
-class BJT:public component {
+class BJT: public component {
    string BJT_name;
    float beta;
 };
 
-class MOSFET :public component {
+class MOSFET: public component {
     string MOSFETname;
     float length;
     float width;
 };
 
-class independent_v_source : public components
+class independent_v_source: public component
 {
   double value;
   double frequency;
-}
+};
 
 /*/////////////////////////
   FUNCTION DECLARATIONS

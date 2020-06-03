@@ -33,4 +33,5 @@ double suffix_parser(string input) {
 
   // No matching case.
   assert(1 && "Invalid number formatting in netlist."); // Invalid input format
+  return 0; // To avoid compiler errors
 }
