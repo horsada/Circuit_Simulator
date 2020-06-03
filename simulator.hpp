@@ -13,11 +13,12 @@ class component;
 class independent_v_source;
 
 class network_simulation {
-  double stop_time; // Duration of simulation
-  double timestep; // Temporal Resolution of simulation
-  vector<component> network_components;
-  vector<node> network_nodes;
-  vector<independent_v_source> v_sources;
+  public:
+    double stop_time; // Duration of simulation
+    double timestep; // Temporal Resolution of simulation
+    vector<component> network_components;
+    vector<node> network_nodes;
+    vector<independent_v_source> v_sources;
 };
 
 class node {
@@ -55,7 +56,6 @@ class R: public component {
     double read_value(){
       return component_value;
     }
-
     // Adam - for read_file.cpp
     R(string device_name, double value, node posi_node, node nega_node) {
       component_name = device_name;
@@ -154,7 +154,7 @@ class independent_i_source: public component
 double suffix_parser(string prefix_value);
 
 // Takes a netlist line and processes it
-int parse_netlist_line(network_simulation netlist_network, string netlist_line);
+int parse_netlist_line(network_simulation &netlist_network, string netlist_line);
 
 //This get_impedance function is overloaded to return the impedance of several different component
 double get_impedance(R r);
