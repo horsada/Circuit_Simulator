@@ -120,12 +120,11 @@ class independent_v_source: public component
 {
   double value;
   double frequency;
-  independent_v_source(string device_name, node posi_node, node nega_node, double in_value, double in_frequency){
+  independent_v_source(string device_name, double in_value, node posi_node, node nega_node){
 	  component_name = device_name;
 	  value = in_value;
 	  connected_terminals.push_back(posi_node);
 	  connected_terminals.push_back(nega_node);
-	  frequency = in_frequency;
   }
 
 };
@@ -133,12 +132,11 @@ class independent_v_source: public component
 class independent_i_source: public component
 {
 	double value;
-	independent_v_source(string device_name, node posi_node, node nega_node, double in_value, double in_frequency){
+	independent_i_source(string device_name, double in_value, node posi_node, node nega_node){
       component_name = device_name;
       value = in_value;
 	  connected_terminals.push_back(posi_node);
 	  connected_terminals.push_back(nega_node);
-	  frequency = in_frequency;
 	}
 };
 
