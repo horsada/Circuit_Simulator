@@ -25,6 +25,7 @@ class node {
   public:
   	int index; // changed to int for read_file.cpp
     double sum_of_conductances;
+	double node_voltage;
     vector<double> conductances;
   	vector<component> connected_components;
     ~node(){};
@@ -113,6 +114,11 @@ class independent_v_source: public component
 {
   double value;
   double frequency;
+};
+
+class independent_i_source: public component
+{
+	double value;
 };
 
 /*/////////////////////////
