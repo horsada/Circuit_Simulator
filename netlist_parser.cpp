@@ -2,8 +2,7 @@
 #include "dependencies.hpp"
 
 // Returns status code of parse operation: 0-success; 1-end_of_file; 2-parser_error;
-int parse_netlist_line(network_simulation netlist_network, string netlist_line) {
-  cout << "netlist_parser_here" << endl;
+int parse_netlist_line(network_simulation &netlist_network, string netlist_line) {
   // REGEX is used to verify and classify the netlist line
   // There are different types of lines in reduced spice format
   //1:Component => <designator> <node0> <node1> [<node 2] <value>
@@ -18,7 +17,7 @@ int parse_netlist_line(network_simulation netlist_network, string netlist_line) 
   // Trying to match one of the three types
   if (regex_match(netlist_line, reduced_spice_format_component)) {
     // Line is a component
-    cout << "end of netlist" << endl;
+    // Classify component, get nodes, get component; push to netlist_network
     return 0;
   }
   else if (regex_match(netlist_line, reduced_spice_format_comment)) {
@@ -26,16 +25,20 @@ int parse_netlist_line(network_simulation netlist_network, string netlist_line) 
     return 0;
   }
   else if (regex_match(netlist_line, reduced_spice_format_tran)) {
-    // Line is a .tran
+
+    string netlist_stop_time_with_suffix, netlist_timestep_with_suffix, placeholder;
     double netlist_stop_time, netlist_timestep;
-    smatch matches;
-    regex time_values(" 0 (.*?)s"); // Matches e.g. " 0 10ms", need substrings (3, end-1)
-    regex_search(netlist_line, matches, time_values);
-    assert(matches.size()==2); // There should be two matches in the line
-    //netlist_stop_time = suffix_parser(matches[0].substr(3, matches[0].length()-4));
-    //netlist_timestep = suffix_parser(matches[1].substr(3, matches[1].length()-4));
-    cout << "netlist_stop_time: " << netlist_stop_time << endl;
-    cout << "netlist_timestep: " << netlist_timestep << endl;
+
+    // As the line is space-separated, a string stream is used to separate out the values
+    stringstream input(netlist_line);
+    input >> placeholder >> placeholder >> netlist_stop_time_with_suffix >> placeholder >> netlist_timestep_with_suffix;
+
+    netlist_stop_time = suffix_parser(netlist_stop_time_with_suffix);
+    netlist_timestep = suffix_parser(netlist_timestep_with_suffix);
+
+    // Set network parameters
+    netlist_network.stop_time=netlist_stop_time;
+    netlist_network.timestep=netlist_timestep;
     return 0;
   }
   else if (regex_match(netlist_line, reduced_spice_format_end)) {
