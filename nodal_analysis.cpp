@@ -54,24 +54,40 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2)
   }*/
 }
 
+int network_simulation::no_of_v_sources()
+{
+	int count;
+	for(int i=; i<this->network_components.size(); i++)
+	{
+		if(this->v_sources[i] == **voltage source**)
+		{
+			count++;
+		}
+	}
+	return count;
+}
+
 matrixXd A_inverse inverse_matrix(matrixXd A)
 {
 	return A.inverse;
 }
 
 // inspiration taken from swarthmore.edu
-void create_conductance_matrix(network_simulation A, matrixXd G, matrixXd B, matrixXd C, matrixXd D)
+MatrixXd create_conductance_matrix(network_simulation A, matrixXd G, matrixXd B, matrixXd C, matrixXd D)
 {
 	MatrixXd A(2,2);
 	A(0,0) = G;
 	A(0,1) = B;
 	A(1,0) = C;
 	A(0,1) = D;
+	return A;
 }
 /* For the below function to work, we need:
 - Order the vector network_nodes in order of nodes(0, 1, 2 etc.)
+- Need to know independent voltage source positive and negative node for B matrix
+-
 */
-void create_G_matrix(network_simulation A)
+MatrixXd create_G_matrix(network_simulation A)
 {
 
 	//diagonal part of matrix G
@@ -93,20 +109,13 @@ void create_G_matrix(network_simulation A)
 			}
 		}
 	}
+	return G;
 
 }
 
-void create_B_matrix(network_simulation A)
+MatrixXd create_B_matrix(network_simulation A)
 {
-	int count;
-	for(int i=; i<A.network_components.size(); i++)
-	{
-		if(A.network_components[i] == **voltage source**)
-		{
-			count++;
-		}
-	}
-	MatrixXd B(A.network_nodes.size(),count);
+	MatrixXd B(A.network_nodes.size(),A.no_of_v_sources);
 	for(int i=0; i<B.columns(); i++)
 	{
 		for(int j=0; i<B.rows(); j++)
@@ -128,23 +137,39 @@ void create_B_matrix(network_simulation A)
 			}
 		}
 	}
+	return B;
 }
 
-void create_C_matrix(MatrixXd B)
+MatrixXd create_C_matrix(MatrixXd B)
 {
-	MatrixXd C = B.transpose();
+	return MatrixXd C = B.transpose();
 }
 
 void create_D_matrix(network_simulation A)
 {
-	int count_v_sources;
-	for(int i=; i<A.network_components.size(); i++)
-	{
-		if(A.network_components[i] == **voltage source**)
-		{
-			count++;
-		}
-	MatrixXd = (count,count);
+	return MatrixXd = (A.no_of_v_sources,A.no_of_v_sources);
+}
+
+MatrixXd create_x_matrix(MatrixXd v, MatrixXd j)
+{
+	MatrixXd x(2,1);
+	x(0,0) = v;
+	x(1,0) = j;
+	return x;
+}
+
+MatrixXd create_v_matrix(network_simulation A)
+{
+	MatrixXd v(A.network_nodes,1);
+	//need to populate with voltages at each node
+	return v;
+}
+
+MatrixXd create_j_matrix(network_simulation A)
+{
+	MatrixXd j(A.no_of_v_sources,1);
+	//need to populate with current through each voltage source
+	return j;
 }
 
 

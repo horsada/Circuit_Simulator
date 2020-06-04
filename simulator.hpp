@@ -17,6 +17,9 @@ class network_simulation {
   vector<component> network_components;
   vector<node> network_nodes;
   vector<independent_v_source> v_sources;
+
+  int no_of_v_sources();
+  int no_of_nodes();
 };
 
 class node {
