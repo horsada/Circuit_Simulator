@@ -17,7 +17,56 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
   // Trying to match one of the three types
   if (regex_match(netlist_line, reduced_spice_format_component)) {
     // Line is a component
-    // Classify component, get nodes, get component; push to netlist_network
+
+    if(netlist_line[0]=='R') {
+      string component_name, node1_raw, node2_raw, value_with_suffix;
+      int node_index_1, node_index_2;
+      double component_value;
+
+      // String stream to separate netlist line
+      stringstream input(netlist_line);
+      input >> component_name >> node1_raw >> node2_raw >> value_with_suffix;
+
+      // Converting raw netlist components to usable values
+      component_value = suffix_parser(value_with_suffix);
+      node_index_1 = parse_node_name_to_index(node1_raw);
+      node_index_2 = parse_node_name_to_index(node2_raw);
+
+      // defining & pushing nodes, if not existing
+      node new_node_1(node_index_1);
+      node new_node_2(node_index_2);
+
+      if (find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),new_node_1)==netlist_network.network_nodes.end()) {
+        cout << "NEW!" << endl;
+        netlist_network.network_nodes.push_back(new_node_1);
+      }
+      if (find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),new_node_2)==netlist_network.network_nodes.end()) {
+        cout << "NEW!" << endl;
+        netlist_network.network_nodes.push_back(new_node_2);
+      }
+
+      // defining and pushing new component
+      R new_resistor(component_name, component_value);
+      netlist_network.network_components.push_back(new_resistor);
+
+    }
+    // Capacitor
+    if(netlist_line[0]=='C') {
+
+    }
+    // Inductor
+    if(netlist_line[0]=='L') {
+
+    }
+
+    // Current sources DC
+    // Current source AC
+    // Voltage sources DC
+    // Voltage source AC
+    // Inductor
+    // Capacitor
+    // Diode
+    // Transistor
     return 0;
   }
   else if (regex_match(netlist_line, reduced_spice_format_comment)) {
@@ -37,8 +86,9 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
     netlist_timestep = suffix_parser(netlist_timestep_with_suffix);
 
     // Set network parameters
-    netlist_network.stop_time=netlist_stop_time;
-    netlist_network.timestep=netlist_timestep;
+    netlist_network.stop_time = netlist_stop_time;
+    netlist_network.timestep = netlist_timestep;
+
     return 0;
   }
   else if (regex_match(netlist_line, reduced_spice_format_end)) {

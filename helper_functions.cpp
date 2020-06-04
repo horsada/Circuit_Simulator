@@ -36,6 +36,22 @@ double suffix_parser(string input) {
   }
 
   // No matching case.
-  assert(1 && "Invalid number formatting in netlist."); // Invalid input format
-  return 0; // To avoid compiler errors
+  cout << "[ERROR] Incorrect netlist line: " << endl << input << endl;
+  return 0; // To avoid compiler warnings
+}
+
+// This converts a raw node name from the netlist to the pure node index (int)
+int parse_node_name_to_index(string node_name) {
+  regex standard_node("N[0-9][0-9][0-9]");
+  if(regex_match(node_name, standard_node)){
+    return stoi(node_name.substr(1));
+  }
+  regex reference_node("0");
+  if(regex_match(node_name, reference_node)){
+    return 0;
+  }
+  else {
+    cout << "[ERROR] Incorrect node name: " << node_name << endl;
+    return 0; // To avoid compiler warnings
+  }
 }

@@ -21,23 +21,28 @@ class network_simulation {
     vector<independent_v_source> v_sources;
 };
 
+
 class node {
   public:
-  	int index; // changed to int for read_file.cpp
+    int index;
     double sum_of_conductances;
-	double node_voltage;
+    double node_voltage;
     vector<double> conductances;
-  	vector<component> connected_components;
+    vector<component> connected_components;
     ~node(){};
     node(int node_index)
     {
       index = node_index;
     }
-    void set_sum_of_conductances()
-    {
+    // operator overload needed to check if two nodes are the same
+    bool operator==(const node& other_node) const {
+      return this->index == other_node.index;
+    }
+    void set_sum_of_conductances() {
       // assign member variable sum_of_conductances using this function
     }
 };
+
 
 class component {
   public:
@@ -131,6 +136,9 @@ class independent_i_source: public component
 
 // This function takes in a string suffix value (7.2k, 25m, 15Meg) and converts to a double.
 double suffix_parser(string prefix_value);
+
+// This converts a raw node name from the netlist to the pure node index (int)
+int parse_node_name_to_index(string node_name);
 
 // Takes a netlist line and processes it
 int parse_netlist_line(network_simulation &netlist_network, string netlist_line);
