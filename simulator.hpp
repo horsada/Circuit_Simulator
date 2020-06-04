@@ -62,9 +62,11 @@ class R: public component {
       return component_value;
     }
     // Adam - for read_file.cpp
-    R(string device_name, double value) {
+    R(string device_name, double value, node posi_node, node nega_node) {
       component_name = device_name;
       component_value = value;
+	  connected_terminals.push_back(posi_node);
+	  connected_terminals.push_back(nega_node);
     }
 };
 
@@ -74,9 +76,11 @@ private:
 	double component_value;
 public:
   // Adam - for read_file.cpp
-  C(string device_name, double value) {
+  C(string device_name, double value,node posi_node, node nega_node) {
     component_name = device_name;
     component_value = value;
+	connected_terminals.push_back(posi_node);
+	connected_terminals.push_back(nega_node);
   }
   double read_value(){
     return component_value;
@@ -88,9 +92,11 @@ private:
 	double component_value;
 public:
   // Adam - for read_file.cpp
-  L(string device_name, double value) {
+  L(string device_name, double value, node posi_node, node nega_node) {
     component_name = device_name;
     component_value = value;
+	connected_terminals.push_back(posi_node);
+	connected_terminals.push_back(nega_node);
   }
   double read_value(){
     return component_value;
@@ -119,11 +125,24 @@ class independent_v_source: public component
 {
   double value;
   double frequency;
+  independent_v_source(string device_name, double in_value, node posi_node, node nega_node){
+	  component_name = device_name;
+	  value = in_value;
+	  connected_terminals.push_back(posi_node);
+	  connected_terminals.push_back(nega_node);
+  }
+
 };
 
 class independent_i_source: public component
 {
 	double value;
+	independent_i_source(string device_name, double in_value, node posi_node, node nega_node){
+      component_name = device_name;
+      value = in_value;
+	  connected_terminals.push_back(posi_node);
+	  connected_terminals.push_back(nega_node);
+	}
 };
 
 /*/////////////////////////
