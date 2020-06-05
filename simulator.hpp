@@ -13,12 +13,14 @@ class component;
 class independent_v_source;
 
 class network_simulation {
-  public:
-    double stop_time; // Duration of simulation
-    double timestep; // Temporal Resolution of simulation
-    vector<component> network_components;
-    vector<node> network_nodes;
-    vector<independent_v_source> v_sources;
+  double stop_time; // Duration of simulation
+  double timestep; // Temporal Resolution of simulation
+  vector<component> network_components;
+  vector<node> network_nodes;
+  vector<independent_v_source> v_sources;
+
+  int no_of_v_sources();
+  int no_of_nodes();
 };
 
 
