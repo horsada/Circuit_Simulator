@@ -37,13 +37,7 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
       node new_node_1(node_index_1);
       node new_node_2(node_index_2);
       vector<node> new_nodes = {new_node_1, new_node_2};
-
-      if (find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),new_node_1)==netlist_network.network_nodes.end()) {
-        netlist_network.network_nodes.push_back(new_node_1);
-      }
-      if (find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),new_node_2)==netlist_network.network_nodes.end()) {
-        netlist_network.network_nodes.push_back(new_node_2);
-      }
+      push_nodes(netlist_network, new_nodes);
 
       // Resistor
       if(netlist_line[0]=='R') {
@@ -65,21 +59,62 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
       }
     }
 
-    // Capacitor
-    if(netlist_line[0]=='C') {
+    // AC Sources
+    // Matches SINE function
+    regex full_sine_function_pattern("(V|I).+SINE\\([0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)? [0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)? [0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)?\\)");
+    smatch sine_function_matches_exists;
 
-    }
-    // Inductor
-    if(netlist_line[0]=='L') {
+    if(regex_search(netlist_line, sine_function_matches_exists, full_sine_function_pattern)) {
+      // Extracting basic netlist line sections
+      string component_name, node1_raw, node2_raw;
+      int node_index_1, node_index_2;
+      stringstream input1(netlist_line);
+      input1 >> component_name >> node1_raw >> node2_raw;
 
+      // Converting raw netlist components to usable values
+      node_index_1 = parse_node_name_to_index(node1_raw);
+      node_index_2 = parse_node_name_to_index(node2_raw);
+
+      // defining & pushing nodes, if not existing
+      node new_node_1(node_index_1);
+      node new_node_2(node_index_2);
+      vector<node> new_nodes = {new_node_1, new_node_2};
+      push_nodes(netlist_network, new_nodes);
+
+      // Extract SINE(X Y Z) function parameters
+      regex sine_paramters_pattern("[0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)? [0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)? [0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)?");
+      smatch sine_function_paramters_only;
+      regex_search(sine_function_matches_exists.str(0), sine_function_paramters_only, sine_paramters_pattern);
+
+      string dc_offset_raw, amplitude_raw, frequency_raw;
+      double dc_offset, amplitude, frequency;
+
+      stringstream input(sine_function_paramters_only.str(0));
+      input >> dc_offset_raw >> amplitude_raw >> frequency_raw;
+
+      dc_offset = suffix_parser(dc_offset_raw);
+      amplitude = suffix_parser(amplitude_raw);
+      frequency = suffix_parser(frequency_raw);
+
+      // AC voltage source
+      if(netlist_line[0]=='V') {
+        independent_v_source new_v_source(component_name, dc_offset, amplitude, frequency, new_nodes);
+        netlist_network.network_components.push_back(new_v_source);
+      }
+
+      // AC current sources
+      if(netlist_line[0]=='I') {
+        independent_i_source new_i_source(component_name, dc_offset, amplitude, frequency, new_nodes);
+        netlist_network.network_components.push_back(new_i_source);
+      }
     }
 
     // Current sources DC
+
     // Current source AC
     // Voltage sources DC
     // Voltage source AC
-    // Inductor
-    // Capacitor
+
     // Diode
     // Transistor
     return 0;

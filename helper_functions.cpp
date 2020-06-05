@@ -55,3 +55,11 @@ int parse_node_name_to_index(string node_name) {
     return 0; // To avoid compiler warnings
   }
 }
+
+void push_nodes(network_simulation &netlist_network, vector<node> new_nodes) {
+  for(auto const& node: new_nodes) {
+    if (find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),node)==netlist_network.network_nodes.end()) {
+      netlist_network.network_nodes.push_back(node);
+    }
+  }
+}
