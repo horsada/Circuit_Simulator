@@ -15,10 +15,10 @@ int main() {
     //node1.node_index = "nodenum1";
     //node1.connected_components = {R1,R2};
 
-    //// Testing netlist_parser for resistors
+    // Testing netlist_parser for resistors
     // parse_netlist_line(sim, ".tran 0 10ms 0 1Megs");
-    // parse_netlist_line(sim, "R1 N001 0 1Meg");
-    // parse_netlist_line(sim, "R2 0 N001 1.2k");
+    // parse_netlist_line(sim, "L1 N001 0 1Meg");
+    // parse_netlist_line(sim, "C2 0 N001 1.2k");
     // cout << sim.stop_time << endl;
     // cout << sim.timestep << endl;
     //

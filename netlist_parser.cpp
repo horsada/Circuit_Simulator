@@ -18,7 +18,8 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
   if (regex_match(netlist_line, reduced_spice_format_component)) {
     // Line is a component
 
-    if(netlist_line[0]=='R') {
+    // Similar parsing process for R, C, L
+    if(netlist_line[0]=='R'||netlist_line[0]=='C'||netlist_line[0]=='L') {
       string component_name, node1_raw, node2_raw, value_with_suffix;
       int node_index_1, node_index_2;
       double component_value;
@@ -35,21 +36,35 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
       // defining & pushing nodes, if not existing
       node new_node_1(node_index_1);
       node new_node_2(node_index_2);
+      vector<node> new_nodes = {new_node_1, new_node_2};
 
       if (find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),new_node_1)==netlist_network.network_nodes.end()) {
-        cout << "NEW!" << endl;
         netlist_network.network_nodes.push_back(new_node_1);
       }
       if (find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),new_node_2)==netlist_network.network_nodes.end()) {
-        cout << "NEW!" << endl;
         netlist_network.network_nodes.push_back(new_node_2);
       }
 
-      // defining and pushing new component
-      R new_resistor(component_name, component_value);
-      netlist_network.network_components.push_back(new_resistor);
-
+      // Resistor
+      if(netlist_line[0]=='R') {
+        // defining and pushing new component
+        R new_resistor(component_name, component_value, new_nodes);
+        netlist_network.network_components.push_back(new_resistor);
+      }
+      // Capacitor
+      if(netlist_line[0]=='C') {
+        // defining and pushing new component
+        C new_capacitor(component_name, component_value, new_nodes);
+        netlist_network.network_components.push_back(new_capacitor);
+      }
+      // Inductor
+      if(netlist_line[0]=='L') {
+        // defining and pushing new component
+        L new_inductor(component_name, component_value, new_nodes);
+        netlist_network.network_components.push_back(new_inductor);
+      }
     }
+
     // Capacitor
     if(netlist_line[0]=='C') {
 
