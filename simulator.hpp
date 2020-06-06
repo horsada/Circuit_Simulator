@@ -19,7 +19,6 @@ class network_simulation {
     double timestep; // Temporal Resolution of simulation
     vector<component> network_components;
     vector<node> network_nodes;
-    double ang_freq;
 
     int no_of_v_sources();
     int no_of_nodes();
@@ -51,19 +50,6 @@ class component {
     string component_name;
     vector<node> connected_terminals;
     virtual ~component(){};
-<<<<<<< HEAD
-    virtual double const read_value() const=0;
-    virtual get_impedance() =0; // This needs to be implemented everywhere in order to be pure-virtual
-=======
-    virtual double const read_value() const=0; // This needs to be implemented everywhere in order to be pure-virtual
-	bool operator==(const component& other_component) const {
-		bool output = false;
-		if(component.component_name == other_component.component_name){
-			output = true;
-		}
-		return output;
-	}
->>>>>>> 1546c5643bf49e1ae924250f3600f3c567ada12f
 };
 
 /*/////////////////////////////////////////
@@ -72,17 +58,13 @@ class component {
 class R: public component {
   private:
       double component_value;
-      string component_name;
   public:
     R(string device_name, double value, vector<node> connected_nodes) {
       component_name = device_name;
       component_value = value;
       connected_terminals = connected_nodes;
     }
-    double const complex_read_value() const {
-      return complex<double> = (component_value, 0);
-    };
-    complex<float> r::impedance(network_simulation A);
+
 };
 
 
@@ -95,10 +77,7 @@ public:
     component_value = value;
     connected_terminals = connected_nodes;
   }
-  double const read_value() const{
-    return component_value;
-  }
-  complex<float> c::impedance(network_simulation A);
+
 };
 
 class L: public component {
@@ -110,10 +89,7 @@ public:
     component_value = value;
     connected_terminals = connected_nodes;
   }
-  double const read_value() const{
-    return component_value;
-  }
-  complex<float> l::impedance(network_simulation A);
+
 };
 
 
@@ -122,7 +98,7 @@ public:
 ///////////////////////////*/
 
 // All sources are treated as AC sources, for DC the frequency, and amplitude is zero, and DC offset is set.
-class independent_v_source: public component, public network_simulation {
+class independent_v_source: public component {
 public:
     double dc_offset;
     double amplitude;
@@ -136,13 +112,10 @@ public:
       amplitude = amplitude_from_netlist;
       frequency = frequency_from_netlist;
     }
-    double const read_value() const {
-      cout << this->dc_offset << endl;
-      return dc_offset;
-    }
+
 };
 
-class independent_i_source: public component, public network_simulation {
+class independent_i_source: public component {
 public:
     double dc_offset;
     double amplitude;
@@ -156,10 +129,7 @@ public:
       amplitude = amplitude_from_netlist;
       frequency = frequency_from_netlist;
     }
-    double const read_value() const {
-      cout << this->dc_offset << endl;
-      return dc_offset;
-    }
+
 };
 
 
@@ -215,5 +185,4 @@ double sum_conductance(vector<component> components);
 
 bool is_a_node_voltage_known(node input, node reference_node);
 
-bool r_two_nodes_supernodes(node node1, node node2, node reference_node);
 #endif
