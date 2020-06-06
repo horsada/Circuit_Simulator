@@ -1,25 +1,24 @@
 #include "dependencies.hpp"
 #include "simulator.hpp"
 
-double get_impedance(component r){
-	return r.read_value();
+double r::get_impedance(){
+	return r.complex_read_value();
 }
 
-// complex<float> get_impedance(C c, float angular_fre){
-// 	float interm;
-// 	interm = c.read_value();
-// 	return {0, -1/(angular_fre*interm)};
-// }
-//
-// complex<float> get_impedance(L l, float angular_fre){
-// 	float interm;
-// 	interm = l.read_value();
-// 	return {0, angular_fre*interm};
-// }
-//
-// complex<float> get_impedance(diode d, float angular_fre){}
+ complex<float> c::get_impedance(C c, float angular_fre){
+ 	float interm;
+ 	interm = c.read_value();
+ 	return {0, -1/(angular_fre*interm)};
+ }
 
-//diode is leftout for now. I think it can be treated as a current source with an extra switch, which is controlled by the voltage difference across the diode
+ complex<float> l::get_impedance(L l, float angular_fre){
+ 	float interm;
+ 	interm = l.read_value();
+ 	return {0, angular_fre*interm};
+ }
+
+ //diode is leftout for now. I think it can be treated as a current source with an extra switch, which is controlled by the voltage difference across the diode
+ complex<float> diode::get_impedance(diode d, float angular_fre){}
 
 double sum_conductance(vector<component> components) {
 	double total_conductance;
@@ -30,7 +29,7 @@ double sum_conductance(vector<component> components) {
 	return total_conductance;
 }
 
-double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2)
+void calculate_conductance_between_nodes(node nodeinput1, node nodeinput2)
 {
 
 	// For diagonal conductance matrix entries (G11 ,G22, G33 ...)
@@ -39,7 +38,7 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2)
 	}
 
 	// For all other conductance matrix entries (G12, G21, G13, G31 ...)
-	/*else if (nodeinput1.node_index != nodeinput2.node_index) {
+	else if (nodeinput1.node_index != nodeinput2.node_index) {
 
 		// To find the common intersection, the vectors need to be sorted
 		sort(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end());
@@ -51,13 +50,13 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2)
 		common_components_between_node.resize(it-common_components_between_node.begin());
 		return sum_conductance(common_components_between_node);
 
-  }*/
+  }
 }
 
 int network_simulation::no_of_v_sources()
 {
 	int count;
-	for(int i=; i<this->network_components.size(); i++)
+	for(int i=0; i<this->network_components.size(); i++)
 	{
 		if(this->v_sources[i] == **voltage source**)
 		{
@@ -72,10 +71,13 @@ matrixXd A_inverse inverse_matrix(matrixXd A)
 	return A.inverse;
 }
 
+/*
+
 // inspiration taken from swarthmore.edu
 MatrixXd create_conductance_matrix(network_simulation A, matrixXd G, matrixXd B, matrixXd C, matrixXd D)
 {
-	MatrixXd A(2,2);
+	int total = A.no_of_v_sources + A.no_of_nodes;
+	MatrixXd A(total,total);
 	A(0,0) = G;
 	A(0,1) = B;
 	A(1,0) = C;
@@ -87,6 +89,7 @@ MatrixXd create_conductance_matrix(network_simulation A, matrixXd G, matrixXd B,
 - Need to know independent voltage source positive and negative node for B matrix
 -
 */
+
 MatrixXd create_G_matrix(network_simulation A)
 {
 
@@ -104,14 +107,15 @@ MatrixXd create_G_matrix(network_simulation A)
 			{
 				for(int k=0; k<A.network_nodes.size(); k++)
 				{
-					G(i,j) = -(A.network_nodes[k].sum_of_conductances)
+					G(i,j) =
 				}
 			}
 		}
 	}
 	return G;
-
 }
+
+/*
 
 MatrixXd create_B_matrix(network_simulation A)
 {
@@ -172,11 +176,12 @@ MatrixXd create_j_matrix(network_simulation A)
 	return j;
 }
 
+*/
 
 bool is_a_node_voltage_known(node input, node reference_node){
 // check if a node is connected to any voltage sources, if so, chekc whether the other node of the voltage source is the reference node, or connected to another voltage source.
 	for(int i = 0 ; i < input.connected_components.size(); i++){
-		if(input.connected_components[i].component_name == 'V'){
+		if(input.connected_components[i].component_name.at(0) == 'v'){
 			if(input.connected_components[i].connected_terminals[0] == reference_node){
 				return true;
 			}
@@ -192,5 +197,35 @@ bool is_a_node_voltage_known(node input, node reference_node){
 	}
 	return false;
 }
+
+bool r_two_nodes_supernodes(node node1, node node2, node reference_node){
+	// this bool function checks if two nodes should be combined into supernodes, thus resulting in a different value in the current column
+	// supernodes should be represented by two rows in the matrix.
+	// the first row shows the relationship between the two nodes.
+	// the second row shows the sum of the conductance terms of two nodes.
+	
+	if(is_a_node_voltage_known(node1, reference_node) == 0 && is_a_node_voltage_known(node2, reference_node)== 0 ){
+		bool is_node1_connnected_to_vsource = false;
+		vector<component> vsources_node1_connects;
+		for(int i = 0 ; i < node1.connected_components.size() ; i++){
+			if(node1.connected_components[i].component_name.at(0) == 'v'){
+				is_node1_connnected_to_vsource = true;
+				vsources_node1_connects.push_back(node1.connected_components[i];
+			}
+		}
+		bool is_the_vsource_between_two_nodes = false;
+		if(is_node1_connnected_to_vsource == true){
+			for(int i = 0 ; i < vsources_node1_connects.size(); i++){
+				for(int c = 0; c < vsources_node1_connects[i].connected_terminals.size(); c++){
+					if(vsources_node1_connects[i].connected_terminals[c] == node2){
+					is_the_vsource_between_two_nodes = true;
+					}
+				}
+			}
+		}
+		return is_the_vsource_between_two_nodes;
+	}
+
+	return false;
 
 }
