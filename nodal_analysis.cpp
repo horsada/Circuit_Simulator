@@ -211,16 +211,16 @@ bool r_two_nodes_supernodes(node node1, node node2, node reference_node){
 		bool is_the_vsource_between_two_nodes = false;
 		if(is_node1_connnected_to_vsource == true){
 			for(int i = 0 ; i < vsources_node1_connects.size(); i++){
-				
-
+				for(int c = 0; c < vsources_node1_connects[i].connected_terminals.size(); c++){
+					if(vsources_node1_connects[i].connected_terminals[c] == node2){
+					is_the_vsource_between_two_nodes = true;
+					}
+				}
 			}
-
+		}
+		return is_the_vsource_between_two_nodes;
 	}
 
-
-
-
 	return false;
-
 
 }
