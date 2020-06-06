@@ -50,6 +50,10 @@ class component {
     string component_name;
     vector<node> connected_terminals;
     virtual ~component(){};
+	
+	bool operator==(const component& other_component) const {
+		return this->component_name == other_component.component_name;
+	}
 };
 
 /*/////////////////////////////////////////
