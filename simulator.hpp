@@ -50,7 +50,6 @@ class component {
     string component_name;
     vector<node> connected_terminals;
     virtual ~component(){};
-    virtual double read_value() const=0; // This needs to be implemented everywhere in order to be pure-virtual
 };
 
 /*/////////////////////////////////////////
@@ -65,9 +64,7 @@ class R: public component {
       component_value = value;
       connected_terminals = connected_nodes;
     }
-    double read_value() const {
-      return component_value;
-    };
+
 };
 
 
@@ -80,9 +77,7 @@ public:
     component_value = value;
     connected_terminals = connected_nodes;
   }
-  double read_value() const{
-    return component_value;
-  }
+
 };
 
 class L: public component {
@@ -94,9 +89,7 @@ public:
     component_value = value;
     connected_terminals = connected_nodes;
   }
-  double read_value() const{
-    return component_value;
-  }
+
 };
 
 
@@ -119,10 +112,7 @@ public:
       amplitude = amplitude_from_netlist;
       frequency = frequency_from_netlist;
     }
-    double read_value() const {
-      cout << this->dc_offset << endl;
-      return dc_offset;
-    }
+
 };
 
 class independent_i_source: public component {
@@ -139,10 +129,7 @@ public:
       amplitude = amplitude_from_netlist;
       frequency = frequency_from_netlist;
     }
-    double read_value() const {
-      cout << this->dc_offset << endl;
-      return dc_offset;
-    }
+
 };
 
 
