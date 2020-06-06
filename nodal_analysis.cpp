@@ -176,7 +176,7 @@ MatrixXd create_j_matrix(network_simulation A)
 bool is_a_node_voltage_known(node input, node reference_node){
 // check if a node is connected to any voltage sources, if so, chekc whether the other node of the voltage source is the reference node, or connected to another voltage source.
 	for(int i = 0 ; i < input.connected_components.size(); i++){
-		if(input.connected_components[i].component_name == 'V'){
+		if(input.connected_components[i].component_name.at(0) == 'v'){
 			if(input.connected_components[i].connected_terminals[0] == reference_node){
 				return true;
 			}
@@ -203,7 +203,7 @@ bool r_two_nodes_supernodes(node node1, node node2, node reference_node){
 		bool is_node1_connnected_to_vsource = false;
 		vector<component> vsources_node1_connects;
 		for(int i = 0 ; i < node1.connected_components.size() ; i++){
-			if(node1.connected_components[i] == 'V'){
+			if(node1.connected_components[i].component_name.at(0) == 'v'){
 				is_node1_connnected_to_vsource = true;
 				vsources_node1_connects.push_back(node1.connected_components[i];
 			}
