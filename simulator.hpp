@@ -51,6 +51,13 @@ class component {
     vector<node> connected_terminals;
     virtual ~component(){};
     virtual double const read_value() const=0; // This needs to be implemented everywhere in order to be pure-virtual
+	bool operator==(const component& other_component) const {
+		bool output = false;
+		if(component.component_name == other_component.component_name && component.connected_terminals == other_component.connected_terminals){
+			output = true;
+		}
+		return output;
+	}
 };
 
 /*/////////////////////////////////////////
