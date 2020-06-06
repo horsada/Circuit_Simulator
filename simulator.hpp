@@ -51,8 +51,19 @@ class component {
     string component_name;
     vector<node> connected_terminals;
     virtual ~component(){};
+<<<<<<< HEAD
     virtual double const read_value() const=0;
     virtual get_impedance() =0; // This needs to be implemented everywhere in order to be pure-virtual
+=======
+    virtual double const read_value() const=0; // This needs to be implemented everywhere in order to be pure-virtual
+	bool operator==(const component& other_component) const {
+		bool output = false;
+		if(component.component_name == other_component.component_name){
+			output = true;
+		}
+		return output;
+	}
+>>>>>>> 1546c5643bf49e1ae924250f3600f3c567ada12f
 };
 
 /*/////////////////////////////////////////
@@ -204,4 +215,5 @@ double sum_conductance(vector<component> components);
 
 bool is_a_node_voltage_known(node input, node reference_node);
 
+bool r_two_nodes_supernodes(node node1, node node2, node reference_node);
 #endif

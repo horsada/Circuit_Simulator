@@ -181,7 +181,7 @@ MatrixXd create_j_matrix(network_simulation A)
 bool is_a_node_voltage_known(node input, node reference_node){
 // check if a node is connected to any voltage sources, if so, chekc whether the other node of the voltage source is the reference node, or connected to another voltage source.
 	for(int i = 0 ; i < input.connected_components.size(); i++){
-		if(input.connected_components[i].component_name == 'V'){
+		if(input.connected_components[i].component_name.at(0) == 'v'){
 			if(input.connected_components[i].connected_terminals[0] == reference_node){
 				return true;
 			}
@@ -197,5 +197,35 @@ bool is_a_node_voltage_known(node input, node reference_node){
 	}
 	return false;
 }
+
+bool r_two_nodes_supernodes(node node1, node node2, node reference_node){
+	// this bool function checks if two nodes should be combined into supernodes, thus resulting in a different value in the current column
+	// supernodes should be represented by two rows in the matrix.
+	// the first row shows the relationship between the two nodes.
+	// the second row shows the sum of the conductance terms of two nodes.
+	
+	if(is_a_node_voltage_known(node1, reference_node) == 0 && is_a_node_voltage_known(node2, reference_node)== 0 ){
+		bool is_node1_connnected_to_vsource = false;
+		vector<component> vsources_node1_connects;
+		for(int i = 0 ; i < node1.connected_components.size() ; i++){
+			if(node1.connected_components[i].component_name.at(0) == 'v'){
+				is_node1_connnected_to_vsource = true;
+				vsources_node1_connects.push_back(node1.connected_components[i];
+			}
+		}
+		bool is_the_vsource_between_two_nodes = false;
+		if(is_node1_connnected_to_vsource == true){
+			for(int i = 0 ; i < vsources_node1_connects.size(); i++){
+				for(int c = 0; c < vsources_node1_connects[i].connected_terminals.size(); c++){
+					if(vsources_node1_connects[i].connected_terminals[c] == node2){
+					is_the_vsource_between_two_nodes = true;
+					}
+				}
+			}
+		}
+		return is_the_vsource_between_two_nodes;
+	}
+
+	return false;
 
 }
