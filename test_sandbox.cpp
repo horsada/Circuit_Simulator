@@ -32,7 +32,8 @@ int main() {
     cout << "no. of components: " << sim.network_components.size() << endl;
     for(auto const& value: sim.network_components) {
      cout << "Component found: " << value.component_name << endl;
-     cout << value.read_value();
+     string s = typeid(value).name();
+     cout << s;
     }
 
     // double output;

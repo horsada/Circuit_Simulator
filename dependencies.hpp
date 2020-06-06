@@ -16,6 +16,9 @@
 #include <sstream>
 #include <cassert>
 #include <type_traits>
+#include <typeinfo>
+
+
 // Mathematical Helpers
 #include <cmath>
 #include <algorithm>
