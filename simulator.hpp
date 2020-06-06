@@ -19,6 +19,7 @@ class network_simulation {
     double timestep; // Temporal Resolution of simulation
     vector<component> network_components;
     vector<node> network_nodes;
+    double ang_freq;
 
     int no_of_v_sources();
     int no_of_nodes();
@@ -50,7 +51,8 @@ class component {
     string component_name;
     vector<node> connected_terminals;
     virtual ~component(){};
-    virtual double const read_value() const=0; // This needs to be implemented everywhere in order to be pure-virtual
+    virtual double const read_value() const=0;
+    virtual get_impedance() =0; // This needs to be implemented everywhere in order to be pure-virtual
 };
 
 /*/////////////////////////////////////////
@@ -59,15 +61,17 @@ class component {
 class R: public component {
   private:
       double component_value;
+      string component_name;
   public:
     R(string device_name, double value, vector<node> connected_nodes) {
       component_name = device_name;
       component_value = value;
       connected_terminals = connected_nodes;
     }
-    double const read_value() const {
-      return component_value;
+    double const complex_read_value() const {
+      return complex<double> = (component_value, 0);
     };
+    complex<float> r::impedance(network_simulation A);
 };
 
 
@@ -83,6 +87,7 @@ public:
   double const read_value() const{
     return component_value;
   }
+  complex<float> c::impedance(network_simulation A);
 };
 
 class L: public component {
@@ -97,6 +102,7 @@ public:
   double const read_value() const{
     return component_value;
   }
+  complex<float> l::impedance(network_simulation A);
 };
 
 
@@ -105,7 +111,7 @@ public:
 ///////////////////////////*/
 
 // All sources are treated as AC sources, for DC the frequency, and amplitude is zero, and DC offset is set.
-class independent_v_source: public component {
+class independent_v_source: public component, public network_simulation {
 public:
     double dc_offset;
     double amplitude;
@@ -125,7 +131,7 @@ public:
     }
 };
 
-class independent_i_source: public component {
+class independent_i_source: public component, public network_simulation {
 public:
     double dc_offset;
     double amplitude;
