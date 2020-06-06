@@ -39,7 +39,7 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2)
 	}
 
 	// For all other conductance matrix entries (G12, G21, G13, G31 ...)
-	/*else if (nodeinput1.node_index != nodeinput2.node_index) {
+	else if (nodeinput1.node_index != nodeinput2.node_index) {
 
 		// To find the common intersection, the vectors need to be sorted
 		sort(nodeinput1.connected_components.begin(),nodeinput1.connected_components.end());
@@ -51,7 +51,7 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2)
 		common_components_between_node.resize(it-common_components_between_node.begin());
 		return sum_conductance(common_components_between_node);
 
-  }*/
+  }
 }
 
 int network_simulation::no_of_v_sources()
