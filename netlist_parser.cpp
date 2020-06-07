@@ -43,21 +43,22 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
         // defining and pushing new component
         R new_cmp(component_name, component_value, new_nodes);
         netlist_network.network_components.push_back(new_cmp);
+        push_nodes_with_component(netlist_network, new_nodes, new_cmp);
       }
       // Capacitor
       if(netlist_line[0]=='C') {
         // defining and pushing new component
         C new_cmp(component_name, component_value, new_nodes);
         netlist_network.network_components.push_back(new_cmp);
+        push_nodes_with_component(netlist_network, new_nodes, new_cmp);
       }
       // Inductor
       if(netlist_line[0]=='L') {
         // defining and pushing new component
         L new_cmp(component_name, component_value, new_nodes);
         netlist_network.network_components.push_back(new_cmp);
+        push_nodes_with_component(netlist_network, new_nodes, new_cmp);
       }
-
-      push_nodes_with_component(netlist_network, new_nodes, new_cmp);
     }
 
     // AC Sources
@@ -100,15 +101,15 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
       if(netlist_line[0]=='V') {
         independent_v_source new_cmp(component_name, dc_offset, amplitude, frequency, new_nodes);
         netlist_network.network_components.push_back(new_cmp);
+        push_nodes_with_component(netlist_network, new_nodes, new_cmp);
       }
 
       // AC current sources
       if(netlist_line[0]=='I') {
         independent_i_source new_cmp(component_name, dc_offset, amplitude, frequency, new_nodes);
         netlist_network.network_components.push_back(new_cmp);
+        push_nodes_with_component(netlist_network, new_nodes, new_cmp);
       }
-
-      push_nodes_with_component(netlist_network, new_nodes, new_cmp);
 
 
     } else if(netlist_line[0]=='V' || netlist_line[0]=='I') {
@@ -136,15 +137,15 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
       if(netlist_line[0]=='V') {
         independent_v_source new_cmp(component_name, dc_offset, amplitude, frequency, new_nodes);
         netlist_network.network_components.push_back(new_cmp);
+        push_nodes_with_component(netlist_network, new_nodes, new_cmp);
       }
 
       // AC current sources
       if(netlist_line[0]=='I') {
         independent_i_source new_cmp(component_name, dc_offset, amplitude, frequency, new_nodes);
         netlist_network.network_components.push_back(new_cmp);
+        push_nodes_with_component(netlist_network, new_nodes, new_cmp);
       }
-
-      push_nodes_with_component(netlist_network, new_nodes, new_cmp);
 
     }
 

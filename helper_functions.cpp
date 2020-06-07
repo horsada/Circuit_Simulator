@@ -56,13 +56,14 @@ int parse_node_name_to_index(string node_name) {
   }
 }
 
-void push_nodes_with_component(network_simulation &netlist_network, vector<node> new_nodes, component new_cmp);
-  for(auto const& node: new_nodes) {
-    int idx = find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),node) - netlist_network.network_nodes.begin();
-    if (idx < netlist_network.network_nodes.size()) {
+void push_nodes_with_component(network_simulation &netlist_network, vector<node> new_nodes, component new_cmp) {
+  for(auto & node: new_nodes) {
+    if (find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),node)==netlist_network.network_nodes.end()) {
+      node.connected_components = {new_cmp};
       netlist_network.network_nodes.push_back(node);
+    } else {
+      int node_index_in_vector = distance(netlist_network.network_nodes.begin(), find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),node));
+      netlist_network.network_nodes[node_index_in_vector].connected_components.push_back(new_cmp);
     }
-    idx = find(netlist_network.network_nodes.begin(), netlist_network.network_nodes.end(),node) - netlist_network.network_nodes.begin();
-    netlist_network.network_nodes[idx].connected_components.push_back(new_cmp);
   }
 }
