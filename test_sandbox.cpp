@@ -18,10 +18,10 @@ int main() {
     // Testing netlist_parser for resistors
     parse_netlist_line(sim, ".tran 0 10ms 0 1Megs");
     parse_netlist_line(sim, "L1 N001 0 1Meg");
-    parse_netlist_line(sim, "C1 N002 0 1Meg");
+    parse_netlist_line(sim, "L1 N001 0 1");
+    parse_netlist_line(sim, "C1 N002 0 1.5k");
     parse_netlist_line(sim, "R5 N003 0 1Meg");
-    parse_netlist_line(sim, "V1 N003 0 SINE(2.3Meg 1u 1000.324m)");
-    parse_netlist_line(sim, "I10 N003 0 SINE(2000 500 1)");
+
     cout << sim.stop_time << endl;
     cout << sim.timestep << endl;
 
@@ -34,8 +34,7 @@ int main() {
 
      cout << "Component found: " << value.component_name << endl;
      cout << "type=" << value.component_name[0] << endl;
-     cout << "value: " << (&value)->read_value()[0] << endl;
-
+     cout << "value=" << value.read_value()[0] << endl;
     }
 
 }
