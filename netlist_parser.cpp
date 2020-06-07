@@ -107,6 +107,40 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
         independent_i_source new_i_source(component_name, dc_offset, amplitude, frequency, new_nodes);
         netlist_network.network_components.push_back(new_i_source);
       }
+    } else if(netlist_line[0]=='V' || netlist_line[0]=='I') {
+      // Extracting basic netlist line sections
+      string component_name, node1_raw, node2_raw, dc_value_raw;
+      int node_index_1, node_index_2;
+      stringstream input1(netlist_line);
+      input1 >> component_name >> node1_raw >> node2_raw >> dc_value_raw;
+
+      // Converting raw netlist components to usable values
+      node_index_1 = parse_node_name_to_index(node1_raw);
+      node_index_2 = parse_node_name_to_index(node2_raw);
+
+      // defining & pushing nodes, if not existing
+      node new_node_1(node_index_1);
+      node new_node_2(node_index_2);
+      vector<node> new_nodes = {new_node_1, new_node_2};
+      push_nodes(netlist_network, new_nodes);
+
+      double dc_offset, amplitude, frequency;
+      dc_offset = suffix_parser(dc_value_raw);
+      amplitude = 0.0;
+      frequency = 0.0;
+
+      // AC voltage source
+      if(netlist_line[0]=='V') {
+        independent_v_source new_v_source(component_name, dc_offset, amplitude, frequency, new_nodes);
+        netlist_network.network_components.push_back(new_v_source);
+      }
+
+      // AC current sources
+      if(netlist_line[0]=='I') {
+        independent_i_source new_i_source(component_name, dc_offset, amplitude, frequency, new_nodes);
+        netlist_network.network_components.push_back(new_i_source);
+      }
+
     }
 
     // Current sources DC
