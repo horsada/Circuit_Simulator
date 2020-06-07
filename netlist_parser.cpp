@@ -37,26 +37,27 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
       node new_node_1(node_index_1);
       node new_node_2(node_index_2);
       vector<node> new_nodes = {new_node_1, new_node_2};
-      push_nodes(netlist_network, new_nodes);
 
       // Resistor
       if(netlist_line[0]=='R') {
         // defining and pushing new component
-        R new_resistor(component_name, component_value, new_nodes);
-        netlist_network.network_components.push_back(new_resistor);
+        R new_cmp(component_name, component_value, new_nodes);
+        netlist_network.network_components.push_back(new_cmp);
       }
       // Capacitor
       if(netlist_line[0]=='C') {
         // defining and pushing new component
-        C new_capacitor(component_name, component_value, new_nodes);
-        netlist_network.network_components.push_back(new_capacitor);
+        C new_cmp(component_name, component_value, new_nodes);
+        netlist_network.network_components.push_back(new_cmp);
       }
       // Inductor
       if(netlist_line[0]=='L') {
         // defining and pushing new component
-        L new_inductor(component_name, component_value, new_nodes);
-        netlist_network.network_components.push_back(new_inductor);
+        L new_cmp(component_name, component_value, new_nodes);
+        netlist_network.network_components.push_back(new_cmp);
       }
+
+      push_nodes_with_component(netlist_network, new_nodes, new_cmp);
     }
 
     // AC Sources
@@ -79,7 +80,6 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
       node new_node_1(node_index_1);
       node new_node_2(node_index_2);
       vector<node> new_nodes = {new_node_1, new_node_2};
-      push_nodes(netlist_network, new_nodes);
 
       // Extract SINE(X Y Z) function parameters
       regex sine_paramters_pattern("[0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)? [0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)? [0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)?");
@@ -98,15 +98,19 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
 
       // AC voltage source
       if(netlist_line[0]=='V') {
-        independent_v_source new_v_source(component_name, dc_offset, amplitude, frequency, new_nodes);
-        netlist_network.network_components.push_back(new_v_source);
+        independent_v_source new_cmp(component_name, dc_offset, amplitude, frequency, new_nodes);
+        netlist_network.network_components.push_back(new_cmp);
       }
 
       // AC current sources
       if(netlist_line[0]=='I') {
-        independent_i_source new_i_source(component_name, dc_offset, amplitude, frequency, new_nodes);
-        netlist_network.network_components.push_back(new_i_source);
+        independent_i_source new_cmp(component_name, dc_offset, amplitude, frequency, new_nodes);
+        netlist_network.network_components.push_back(new_cmp);
       }
+
+      push_nodes_with_component(netlist_network, new_nodes, new_cmp);
+
+
     } else if(netlist_line[0]=='V' || netlist_line[0]=='I') {
       // Extracting basic netlist line sections
       string component_name, node1_raw, node2_raw, dc_value_raw;
@@ -122,7 +126,6 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
       node new_node_1(node_index_1);
       node new_node_2(node_index_2);
       vector<node> new_nodes = {new_node_1, new_node_2};
-      push_nodes(netlist_network, new_nodes);
 
       double dc_offset, amplitude, frequency;
       dc_offset = suffix_parser(dc_value_raw);
@@ -131,15 +134,17 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
 
       // AC voltage source
       if(netlist_line[0]=='V') {
-        independent_v_source new_v_source(component_name, dc_offset, amplitude, frequency, new_nodes);
-        netlist_network.network_components.push_back(new_v_source);
+        independent_v_source new_cmp(component_name, dc_offset, amplitude, frequency, new_nodes);
+        netlist_network.network_components.push_back(new_cmp);
       }
 
       // AC current sources
       if(netlist_line[0]=='I') {
-        independent_i_source new_i_source(component_name, dc_offset, amplitude, frequency, new_nodes);
-        netlist_network.network_components.push_back(new_i_source);
+        independent_i_source new_cmp(component_name, dc_offset, amplitude, frequency, new_nodes);
+        netlist_network.network_components.push_back(new_cmp);
       }
+
+      push_nodes_with_component(netlist_network, new_nodes, new_cmp);
 
     }
 

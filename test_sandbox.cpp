@@ -30,7 +30,9 @@ int main() {
     cout << "no. of nodes: " << sim.network_nodes.size() << endl;
     for(auto const& value: sim.network_nodes) {
      cout << "Node found: " << value.index << endl;
+		 cout << "connected_components=" << value.connected_components.size() << endl;
     }
+		
     cout << "no. of components: " << sim.network_components.size() << endl;
     for(auto const& value: sim.network_components) {
 
@@ -42,6 +44,7 @@ int main() {
        cout << "amplitude=" << value.read_value()[1] << endl;
        cout << "frequency=" << value.read_value()[2] << endl;
      }
+
 
     }
 

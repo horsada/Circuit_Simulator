@@ -1,38 +1,43 @@
 #include "simulator.hpp"
 #include "dependencies.hpp"
 
-complex<float> r::impedance(network_simulation A)
-{
-  double resistance = this->component_value;
-  complex<float> impedance = (component_value, 0);
-  return impedance;
+double impedance(component com){
+  if (com.component_name[0] == 'R') {
+    return com.read_value()[0];
+  }
 }
 
-complex<float> c::impedance(network_simulation A)
-{
-  double capacitance = this->component_value;
-  complex<float> impedance = -1/A.ang_freq*capacitance;
-}
-
-complex<float> l::impedance(network_simulation A)\
-{
-  double inductance = this->component_value;
-  complex<float> impedance = -1/A.ang_freq*capacitance;
-}
-
-double sum_of_conductances(node A, network_simulation B)
-{
-  complex<float> sum;
-  for(int i=0; i<A.connected_components; i++)
+double sum_conductance(vector<component> A) {
+  double sum;
+  for(int i=0; i<A.size(); i++)
   {
-    if(A.connected_components.component_name.find(r) > -1)
-    sum += A.connected_components[i].impedance(B);
+    if(A[i].component_name[0] == 'R')
+    sum += 1.0/ impedance(A[i]);
   }
   return sum;
 }
 
-double conductance_between_nodes(node A, node B, network_simulation C)
-{
+double calculate_conductance_between_nodes(node A, node B) {
+
+  // For diagonal conductance matrix entries (G11 ,G22, G33 ...)
+  	if(A.node_index == B.node_index){
+  		return sum_conductance(A.connected_components);
+  	}
+
+    // For all other conductance matrix entries (G12, G21, G13, G31 ...)
+    vector<component> common_components_between_AB;
+    for(int i = 0 ; i < A.connected_components.size(); i++){
+      for(int c = 0; c < B.connected_components.size(); c++){
+        if(A.connected_components[i] == B.connected_components[c]){
+          common_components_between_AB.push_back(A.connected_components[i]);
+        }
+      }
+    }
+    return sum_conductance(common_components_between_AB);
+}
+
+
+/*
 
   for(int i=0; i<max(A.connected_components.size(), B.connected_components.size()); i++)
   {
@@ -47,7 +52,8 @@ double conductance_between_nodes(node A, node B, network_simulation C)
       }
     }
   }
-}
+  */
+
 
 MatrixXd create_G_matrix(network_simulation A)
 {
@@ -91,4 +97,5 @@ MatrixXd create_G_matrix(network_simulation A)
 		}
 	}
 	return G;
+
 }

@@ -155,15 +155,9 @@ int parse_node_name_to_index(string node_name);
 int parse_netlist_line(network_simulation &netlist_network, string netlist_line);
 
 // Adds nodes to a network, if they don't exist already
-void push_nodes(network_simulation &netlist_network, vector<node> new_nodes);
+void push_nodes_with_component(network_simulation &netlist_network, vector<node> new_nodes, component new_cmp);
 
-//This get_impedance function is overloaded to return the impedance of several different component
-double get_impedance(R r);
-//double get_impedance(C c);
-//double get_impedance(L l);
-//double get_impedance(diode d);
-//double get_impedance(BJT b);
-//double get_impedance(MOSFET m);
+double impedance(component com);
 
 //This function takes two nodes and return the conductance term in the conductance matrix.
 double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2);
@@ -172,5 +166,8 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2);
 double sum_conductance(vector<component> components);
 
 bool is_a_node_voltage_known(node input, node reference_node);
+
+bool r_two_nodes_supernodes(independent_v_source vsource, node reference_node);
+
 
 #endif
