@@ -14,7 +14,7 @@ complex<float> c::impedance(network_simulation A)
   complex<float> impedance = -1/A.ang_freq*capacitance;
 }
 
-complex<float> l::impedance(network_simulation A)
+complex<float> l::impedance(network_simulation A)\
 {
   double inductance = this->component_value;
   complex<float> impedance = -1/A.ang_freq*capacitance;
@@ -58,7 +58,29 @@ MatrixXd create_G_matrix(network_simulation A)
 	{
 		for(int j=0;j<G.columns(); j++)
 		{
-			if(i == j)
+      if(is_a_node_voltage_known(A.network_nodes[i], A.network_nodes[0]) == true)
+      {
+        if(i == j)
+        {
+          G(i,j) = 1;
+        }
+        else()
+        {
+          G(i,j) = 0;
+        }
+      }
+      else if(r_two_nodes_supernodes(A.network_nodes[i], A.network_nodes[j], A.network_nodes[0]) == true)
+      {
+        if(A.network_nodes[i].index == i && A.network_nodes[j].index == j)
+        {
+          G(i,j) = voltage_at_supernode(A.network_nodes[i], A.network_nodes[j])
+        }
+        else if(A.network_nodes[i].index == i && A.network_nodes[j].index != j)
+        {
+
+        }
+      }
+			else if(i == j)
 			{
 				G(i,j) = sum_of_conductances(A.network_nodes[i], A);
 			}
