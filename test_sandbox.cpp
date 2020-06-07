@@ -31,12 +31,11 @@ int main() {
     }
     cout << "no. of components: " << sim.network_components.size() << endl;
     for(auto const& value: sim.network_components) {
+
      cout << "Component found: " << value.component_name << endl;
-     string s = typeid(value).name();
-     cout << s;
+     cout << "type=" << value.component_name[0] << endl;
+     cout << "value: " << (&value)->read_value()[0] << endl;
+
     }
 
-    // double output;
-    // output = calculate_conductance_between_nodes(node1,node1);
-    //cout << output << endl;
 }

@@ -50,50 +50,66 @@ class component {
     string component_name;
     vector<node> connected_terminals;
     virtual ~component(){};
-	
-	bool operator==(const component& other_component) const {
-		return this->component_name == other_component.component_name;
-	}
+
+    virtual vector<double> read_value() const {
+      cout << "parent!!" << endl;
+      return {99.0};
+    };
+
+  	bool operator==(const component& other_component) const {
+  		return this->component_name == other_component.component_name;
+  	}
 };
 
+
 /*/////////////////////////////////////////
-//// Resistors, Capacitors, Inductors ////
+//// Resistors, Capacitors, Inductors  ////
 /////////////////////////////////////////*/
 class R: public component {
-  private:
-      double component_value;
   public:
+      double component_value;
     R(string device_name, double value, vector<node> connected_nodes) {
       component_name = device_name;
       component_value = value;
       connected_terminals = connected_nodes;
+    }
+    virtual vector<double> read_value() const {
+      vector<double> values;
+      values.push_back(component_value);
+      return values;
     }
 
 };
 
 
 class C: public component {
-private:
-	double component_value;
-public:
-  C(string device_name, double value, vector<node> connected_nodes) {
-    component_name = device_name;
-    component_value = value;
-    connected_terminals = connected_nodes;
-  }
-
+  public:
+  	double component_value;
+    C(string device_name, double value, vector<node> connected_nodes) {
+      component_name = device_name;
+      component_value = value;
+      connected_terminals = connected_nodes;
+    }
+    virtual vector<double> read_value() const {
+      vector<double> values;
+      values.push_back(component_value);
+      return values;
+    }
 };
 
 class L: public component {
-private:
-	double component_value;
-public:
-  L(string device_name, double value, vector<node> connected_nodes) {
-    component_name = device_name;
-    component_value = value;
-    connected_terminals = connected_nodes;
-  }
-
+  public:
+  	double component_value;
+    L(string device_name, double value, vector<node> connected_nodes) {
+      component_name = device_name;
+      component_value = value;
+      connected_terminals = connected_nodes;
+    }
+    virtual vector<double> read_value() const {
+      vector<double> values;
+      values.push_back(component_value);
+      return values;
+    }
 };
 
 
@@ -103,11 +119,11 @@ public:
 
 // All sources are treated as AC sources, for DC the frequency, and amplitude is zero, and DC offset is set.
 class independent_v_source: public component {
-public:
+  public:
     double dc_offset;
     double amplitude;
     double frequency;
-  public:
+
     independent_v_source(string device_name, double dc_offset_from_netlist, double amplitude_from_netlist, double frequency_from_netlist, vector<node> connected_nodes){
   	  component_name = device_name;
       connected_terminals = connected_nodes;
@@ -117,14 +133,22 @@ public:
       frequency = frequency_from_netlist;
     }
 
+    virtual vector<double> read_value() const {
+      vector<double> values;
+      values.push_back(dc_offset);
+      values.push_back(amplitude);
+      values.push_back(frequency);
+      return values;
+    }
+
 };
 
 class independent_i_source: public component {
-public:
+  public:
     double dc_offset;
     double amplitude;
     double frequency;
-  public:
+
   	independent_i_source(string device_name, double dc_offset_from_netlist, double amplitude_from_netlist, double frequency_from_netlist, vector<node> connected_nodes){
   	  component_name = device_name;
       connected_terminals = connected_nodes;
@@ -132,6 +156,14 @@ public:
       dc_offset = dc_offset_from_netlist;
       amplitude = amplitude_from_netlist;
       frequency = frequency_from_netlist;
+    }
+
+    virtual vector<double> read_value() const {
+      vector<double> values;
+      values.push_back(dc_offset);
+      values.push_back(amplitude);
+      values.push_back(frequency);
+      return values;
     }
 
 };
@@ -147,10 +179,20 @@ class diode: public component {
       connected_terminals = connected_nodes;
       model_name = model_name_from_netlist;
     }
+    virtual vector<double> read_value() const {
+      vector<double> values;
+      values.push_back(0.0);
+      return values;
+    }
 };
 
 class transistor: public component {
    string model_name;
+   virtual vector<double> read_value() const {
+     vector<double> values;
+     values.push_back(0.0);
+     return values;
+   }
 };
 
 /*//////////////////////////////
