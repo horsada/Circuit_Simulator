@@ -169,5 +169,7 @@ bool is_a_node_voltage_known(node input, node reference_node);
 
 bool r_two_nodes_supernodes(independent_v_source vsource, node reference_node);
 
+vector<node> create_v_matrix(network_simulation A);
 
+MatrixXd create_i_matrix(network_simulation A);
 #endif

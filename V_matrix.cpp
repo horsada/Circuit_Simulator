@@ -1,20 +1,25 @@
 #include "simulator.hpp"
 #include "dependencies.hpp"
 
-MatrixXd create_v_matrix(network_simulation A)
+vector<node> create_v_matrix(network_simulation A)
 {
-  int rows = A.no_of_v_sources;
-  MatrixXd v(rows, 1);
-  for(int i=0; i<A.network_components.size(); i++)
-  {
-    if(A.network_components[i].component_name.find('v') > -1)
-    {
-      v(i,1) = A.network_components[i];
-    }
+  vector<node> network_nodes_without_ref_node;
+  for(int c = 0 ; c < A.network_nodes.size(); c++){
+	  if(A.network_nodes[c].index != 0){
+		  network_nodes_without_ref_node.push_back(A.network_nodes[c]);
+	  }
   }
-  return v;
+//  int rows;
+//  rows = network_nodes_without_ref_node.size();
+//	MatrixXd v(rows, 1);
+	
+//  for(int i=0; i<network_nodes_without_ref_node.size(); i++)
+//  {
+//      v(i,1) = network_nodes_without_ref_node[i];
+//  }
+ // return v;
 }
-
+/*
 MatrixXd create_i_matrix(network_simulation A)
 {
   int rows = A.no_of_i_sources;
@@ -34,3 +39,4 @@ MatrixXd create_i_matrix(network_simulation A)
   }
   return i;
 }
+*/
