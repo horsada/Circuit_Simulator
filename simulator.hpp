@@ -173,4 +173,5 @@ double sum_conductance(vector<component> components);
 
 bool is_a_node_voltage_known(node input, node reference_node);
 
+bool r_two_nodes_supernodes(independent_v_source vsource, node reference_node);
 #endif

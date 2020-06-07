@@ -1,6 +1,6 @@
 #include "dependencies.hpp"
 #include "simulator.hpp"
-
+/*
 double r::get_impedance(){
 	return r.complex_read_value();
 }
@@ -70,7 +70,7 @@ matrixXd A_inverse inverse_matrix(matrixXd A)
 {
 	return A.inverse;
 }
-
+*/
 /*
 
 // inspiration taken from swarthmore.edu
@@ -84,12 +84,12 @@ MatrixXd create_conductance_matrix(network_simulation A, matrixXd G, matrixXd B,
 	A(0,1) = D;
 	return A;
 }
-/* For the below function to work, we need:
+ For the below function to work, we need:
 - Order the vector network_nodes in order of nodes(0, 1, 2 etc.)
 - Need to know independent voltage source positive and negative node for B matrix
 -
 */
-
+/*
 MatrixXd create_G_matrix(network_simulation A)
 {
 
@@ -114,7 +114,7 @@ MatrixXd create_G_matrix(network_simulation A)
 	}
 	return G;
 }
-
+*/
 /*
 
 MatrixXd create_B_matrix(network_simulation A)
@@ -178,58 +178,79 @@ MatrixXd create_j_matrix(network_simulation A)
 
 */
 
+
+
+
 bool is_a_node_voltage_known(node input, node reference_node){
-// check if a node is connected to any voltage sources, if so, chekc whether the other node of the voltage source is the reference node, or connected to another voltage source.
-	for(int i = 0 ; i < input.connected_components.size(); i++){
-		if(input.connected_components[i].component_name.at(0) == 'v'){
-			if(input.connected_components[i].connected_terminals[0] == reference_node){
-				return true;
-			}
-			if(input.connected_components[i].connected_terminals[0] == input){
-				if(input.connected_components[i].connected_terminals[1] == reference_node){
-					return true;
-				}else{
-					bool a;
-					a = is_a_node_voltage_known(input.connected_components[i].connected_terminals[1], reference_node);
-		            }
-			}
-		}
-	}
-	return false;
-}
+  // check if a node is connected to any voltage sources, if so, chekc whether the other node of the voltage source is the reference node, or connected to another voltage source.
 
-bool r_two_nodes_supernodes(independent_v_source vsource, node reference_node){
-	// this bool function checks if two nodes should be combined into supernodes, thus resulting in a different value in the current column
-	// supernodes should be represented by two rows in the matrix.
-	// the first row shows the relationship between the two nodes.
-	// the second row shows the sum of the conductance terms of two nodes.
-	node node1;
-	node1 = vsource.connected_terminals[0];
-	node node2;
-	node2 = vsource.connected_terminals[1];
 
-	if(is_a_node_voltage_known(node1, reference_node) == 0 && is_a_node_voltage_known(node2, reference_node)== 0 ){
-		bool is_node1_connnected_to_vsource = false;
-		vector<component> vsources_node1_connects;
-		for(int i = 0 ; i < node1.connected_components.size() ; i++){
-			if(node1.connected_components[i].component_name.at(0) == 'v'){
-				is_node1_connnected_to_vsource = true;
-				vsources_node1_connects.push_back(node1.connected_components[i];
-			}
-		}
-		bool is_the_vsource_between_two_nodes = false;
-		if(is_node1_connnected_to_vsource == true){
-			for(int i = 0 ; i < vsources_node1_connects.size(); i++){
-				for(int c = 0; c < vsources_node1_connects[i].connected_terminals.size(); c++){
-					if(vsources_node1_connects[i].connected_terminals[c] == node2){
-					is_the_vsource_between_two_nodes = true;
-					}
-				}
-			}
-		}
-		return is_the_vsource_between_two_nodes;
-	}
+          if(input == reference_node){
+                  return true;
+          }
 
-	return false;
+          for(int i = 0 ; i < input.connected_components.size(); i++){
+                  if(input.connected_components[i].component_name.at(0) == 'V'){
+                          if(input.connected_components[i].connected_terminals[0] == reference_node){
+                                  return true;
+                          }
+                          if(input.connected_components[i].connected_terminals[0] == input){
+                                  if(input.connected_components[i].connected_terminals[1] == reference_node){
+                                          return true;
+                                  }else{
+                                          //the following part might be a bit wrong, because the function might go back to the input node during recursion
+                                          if(input.connected_components[i].connected_terminals[0]==input){
+                                                  return is_a_node_voltage_known(input.connected_components[i].connected_terminals[1], reference_node);
+                                          }
+                                          if(input.connected_components[i].connected_terminals[1]==input){
+                                                  return is_a_node_voltage_known(input.connected_components[i].connected_terminals[0], reference_node);
+                                          }
+                                  }
+                          }
+                  }
+          }
+          return false;
+  }
 
-}
+
+
+  bool r_two_nodes_supernodes(independent_v_source vsource, node reference_node){
+        // this bool function checks if two nodes should be combined into supernodes, thus resulting in a different value in the current column
+        // supernodes should be represented by two rows in the matrix.
+        // the first row shows the relationship between the two nodes.
+        // the second row shows the sum of the conductance terms of two nodes.
+        node node1(1);
+        node1 = vsource.connected_terminals[0];
+        node node2(2);
+        node2 = vsource.connected_terminals[1];
+
+        if(is_a_node_voltage_known(node1, reference_node) == 0 && is_a_node_voltage_known(node2, reference_node)== 0 ){
+                return true;
+                /*
+                bool is_node1_connnected_to_vsource = false;
+                vector<component> vsources_node1_connects;
+                for(int i = 0 ; i < node1.connected_components.size() ; i++){
+                        if(node1.connected_components[i].component_name.at(0) == 'V'){
+                                is_node1_connnected_to_vsource = true;
+                                vsources_node1_connects.push_back(node1.connected_components[i]);
+                        }
+                }
+                bool is_the_vsource_between_two_nodes = false;
+                if(is_node1_connnected_to_vsource == true){
+                        for(int i = 0 ; i < vsources_node1_connects.size(); i++){
+                          for(int c = 0; c < vsources_node1_connects[i].connected_terminals.size(); c++){
+                                                                  if(vsources_node1_connects[i].connected_terminals[c] == node2){
+                                                                  is_the_vsource_between_two_nodes = true;
+                                                                  }
+                                                          }
+                                                  }
+                                          }
+                                          return is_the_vsource_between_two_nodes;
+                                  */
+                                  }
+
+
+                                  return false;
+
+        }
+
