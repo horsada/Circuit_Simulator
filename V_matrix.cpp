@@ -3,14 +3,18 @@
 
 MatrixXd create_v_matrix(network_simulation A)
 {
-  int rows = A.no_of_v_sources;
-  MatrixXd v(rows, 1);
-  for(int i=0; i<A.network_components.size(); i++)
+  vector<node> network_nodes_without_ref_node;
+  for(int c = 0 ; c < A.network_nodes.size(); c++){
+	  if(A.network_nodes[c].index != 0){
+		  network_nodes_without_ref_node.push_back(A.network_nodes[c]);
+	  }
+  }
+  rows = network_nodes_without_ref_node.size();
+	MatrixXd v(rows, 1);
+
+  for(int i=0; i<network_nodes_without_ref_node.size(); i++)
   {
-    if(A.network_components[i].component_name.find('v') > -1)
-    {
-      v(i,1) = A.network_components[i];
-    }
+      v(i,1) = network_nodes_without_ref_node[i];
   }
   return v;
 }
