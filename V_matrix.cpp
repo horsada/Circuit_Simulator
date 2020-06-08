@@ -40,7 +40,7 @@ double sum_known_currents(node input, double current_time){
 
 			}
 		}
-		
+	return sum_current;	
 	}
 
 	return 0.0;
