@@ -46,6 +46,30 @@ double sum_known_currents(node input, double current_time){
 	return 0.0;
 }
 
+vector<vector<node>> supernode_separation(vector<component> components, node reference_node){
+//this function takes in the components in the network simulation and checks supernodes.
+//This function outputs a vector of vector of nodes.
+//The first vector of nodes contains the relationship node in the supernode, e.g. 1*V2 - 1*V3 = 10
+//The second vector of nodes contains the non relationship node in the supernode, e.g. G11+G21, G12+G22, G13+G23 row
+//This function finds the v sources and does supernode separation
+	vector<node> relationship_node;
+	vector<node> non_relationship_node;
+	vector<vector<node>> output;
+	for(int i = 0 ; i < components.size(); i++){
+		if(components[i].component_name[0] == 'V'){
+			if(r_two_nodes_supernodes(components[i], reference_node){
+				//the positive side of the V source is going to be the relationship node (assumed to be, it doesnt matter if it's the relationship one or the non relationship one
+				relationship_node.push_back(components[i].connected_terminals[0]);
+				non_relationship_node.push_back(components[i].connected_terminals[1]);
+			}
+		}
+	}
+	output.push_back(relationship_node);
+	output.push_back(non_relationship_node);
+	
+	return output;
+
+}
 
 MatrixXd create_i_matrix(network_simulation A, double current_time)
 {
@@ -54,6 +78,25 @@ MatrixXd create_i_matrix(network_simulation A, double current_time)
 
   int rows = nodes_wo_ref_node;
   MatrixXd i(rows,1);
+
+  for(int i = 0; i<A.network_components.size();i++){
+		
+		
+
+
+  }
+
+
+
+
+
+
+
+
+
+
+
+
 
 
   for(int it=0; i<A.network_components.size(); it++)
