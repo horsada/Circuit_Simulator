@@ -21,11 +21,6 @@ int main(){
 
 	sim.network_nodes = nodes;
 
-	vector<node> matrix;
-
-	matrix = create_v_matrix(sim);
-	int a,b;
-	a = matrix[0].index;
-	b = matrix[1].index;
-	cout<< a << " " << b << endl;
+	vector<node> out;
+	out = create_v_matrix(sim);
 }
