@@ -180,4 +180,5 @@ MatrixXd create_i_matrix(network_simulation A);
 
 double sum_known_currents(vector<component> input);
 
+vector<vector<node>> supernode_separation(vector<component> components, node reference_node);
 #endif
