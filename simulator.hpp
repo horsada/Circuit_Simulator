@@ -173,6 +173,9 @@ vector<node> create_v_matrix(network_simulation A);
 // Returns vector of pairs of two regular nodes, which together form a supernode.
 vector< pair<node,node> > supernode_separation(vector<component> components, node reference_node);
 
+// This function sums all the known currents (from current sources) at at node. Positive for net outflow, negative for net inflow.
+double sum_known_currents(node input, double simulation_progress);
+
 
 /// ^^^^^tested until here^^^^^
 
@@ -181,7 +184,5 @@ bool is_a_node_voltage_known(node input, node reference_node);
 bool r_two_nodes_supernodes(component, node reference_node);
 
 MatrixXd create_i_matrix(network_simulation A);
-
-double sum_known_currents(vector<component> input);
 
 #endif
