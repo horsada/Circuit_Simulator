@@ -18,15 +18,20 @@ int main() {
     // Testing netlist_parser for resistors
     parse_netlist_line(sim, ".tran 0 10ms 0 1Megs");
     parse_netlist_line(sim, "R1 N001 0 1.7k");
-    parse_netlist_line(sim, "R3 N001 0 1.43k");
-    parse_netlist_line(sim, "Q1 N001 0 10");
+    parse_netlist_line(sim, "R3 N002 0 1.43k");
+    parse_netlist_line(sim, "R1 N003 0 10");
 
-    cout << sim.stop_time << endl;
-    cout << sim.timestep << endl;
+    // cout << sim.stop_time << endl;
+    // cout << sim.timestep << endl;
 
     double cbn = calculate_conductance_between_nodes(sim.network_nodes[0], sim.network_nodes[1]);
 
-    MatrixXd x = create_G_matrix(sim);
-    cout << "matrix:" << endl << x << endl;
+    vector<node> nds = create_v_matrix(sim);
+    cout << nds.size();
+    for(auto nd: nds) {
+      cout << nd.index;
+    }
+    // MatrixXd x = create_G_matrix(sim);
+    // cout << "matrix:" << endl << x << endl;
 
 }

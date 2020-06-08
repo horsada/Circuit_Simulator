@@ -127,7 +127,7 @@ class independent_i_source: public component {
 ////////////////////////////*/
 class diode: public component {
     string model_name;
-    diode(string device_name, vector<node> connectind_nodes, string model_name_from_netlist) {
+    diode(string device_name, vector<node> connected_nodes, string model_name_from_netlist) {
       component_name = device_name;
       connected_terminals = connected_nodes;
       model_name = model_name_from_netlist;
@@ -167,14 +167,15 @@ double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2);
 // Sums all the conductances of a vector of components
 double sum_conductance(vector<component> components);
 
+// The v column, consists of all the voltage nodes in the circuit, excluding the 0 reference node.
+vector<node> create_v_matrix(network_simulation A);
+
 
 /// ^^^^^tested until here^^^^^
 
 bool is_a_node_voltage_known(node input, node reference_node);
 
 bool r_two_nodes_supernodes(independent_v_source vsource, node reference_node);
-
-vector<node> create_v_matrix(network_simulation A);
 
 MatrixXd create_i_matrix(network_simulation A);
 
