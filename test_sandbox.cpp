@@ -17,20 +17,28 @@ int main() {
 
     // Testing netlist_parser for resistors
     parse_netlist_line(sim, ".tran 0 10ms 0 1Megs");
-    parse_netlist_line(sim, "R1 N001 0 1.7k");
-    parse_netlist_line(sim, "R3 N002 0 1.43k");
-    parse_netlist_line(sim, "R1 N003 0 10");
+    parse_netlist_line(sim, "V1 N003 0 10");
+    parse_netlist_line(sim, "R1 N001 N003 1k");
+    parse_netlist_line(sim, "R2 N002 N003 2k");
+    parse_netlist_line(sim, "V2 N005 N006 5");
+    parse_netlist_line(sim, "V2 N008 N009 5");
 
     // cout << sim.stop_time << endl;
     // cout << sim.timestep << endl;
 
-    double cbn = calculate_conductance_between_nodes(sim.network_nodes[0], sim.network_nodes[1]);
+    // vector<component> components, node reference_node
+    vector<pair<node, node>> x = supernode_separation(sim.network_components, sim.network_nodes[0]);
+    cout << "idx1.1=" << x[0].first.index << endl;
+    cout << "idx1.2=" << x[0].second.index << endl;
+    cout << "idx2.1=" << x[1].first.index << endl;
+    cout << "idx2.2=" << x[1].second.index << endl;
+    cout << "size=" << x.size() << endl;
 
-    vector<node> nds = create_v_matrix(sim);
-    cout << nds.size();
-    for(auto nd: nds) {
-      cout << nd.index;
-    }
+    // vector<node> nds = create_v_matrix(sim);
+    // cout << nds.size();
+    // for(auto nd: nds) {
+    //   cout << nd.index;
+    // }
     // MatrixXd x = create_G_matrix(sim);
     // cout << "matrix:" << endl << x << endl;
 

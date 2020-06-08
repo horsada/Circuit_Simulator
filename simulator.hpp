@@ -170,12 +170,15 @@ double sum_conductance(vector<component> components);
 // The v column, consists of all the voltage nodes in the circuit, excluding the 0 reference node.
 vector<node> create_v_matrix(network_simulation A);
 
+// Returns vector of pairs of two regular nodes, which together form a supernode.
+vector< pair<node,node> > supernode_separation(vector<component> components, node reference_node);
+
 
 /// ^^^^^tested until here^^^^^
 
 bool is_a_node_voltage_known(node input, node reference_node);
 
-bool r_two_nodes_supernodes(independent_v_source vsource, node reference_node);
+bool r_two_nodes_supernodes(component, node reference_node);
 
 MatrixXd create_i_matrix(network_simulation A);
 
