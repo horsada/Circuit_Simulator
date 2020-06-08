@@ -1,26 +1,27 @@
 #include "simulator.hpp"
 #include "dependencies.hpp"
 
-double impedance(component com){
-  if (com.component_name[0] == 'R') {
-    return com.read_value()[0];
+double impedance(component cmp) {
+  if (cmp.component_name[0] == 'R') {
+    return cmp.read_value()[0];
   }
+  return 0.0; // avoids compiler warnings
 }
 
-double sum_conductance(vector<component> A) {
+double sum_conductance(vector<component> components) {
   double sum;
-  for(int i=0; i<A.size(); i++)
-  {
-    if(A[i].component_name[0] == 'R')
-    sum += 1.0/ impedance(A[i]);
+  for(component cmp: components) {
+    if(cmp.component_name[0] == 'R')
+    sum += 1.0/impedance(cmp);
   }
   return sum;
 }
 
+
 double calculate_conductance_between_nodes(node A, node B) {
 
   // For diagonal conductance matrix entries (G11 ,G22, G33 ...)
-  	if(A.node_index == B.node_index){
+  	if(A==B){
   		return sum_conductance(A.connected_components);
   	}
 
@@ -55,8 +56,7 @@ double calculate_conductance_between_nodes(node A, node B) {
   */
 
 
-MatrixXd create_G_matrix(network_simulation A)
-{
+MatrixXd create_G_matrix(network_simulation A) {
 
 	//diagonal part of matrix G
 	MatrixXd G(A.network_nodes.size(), A.network_nodes.size());

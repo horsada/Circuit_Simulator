@@ -157,13 +157,17 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
 // Adds nodes to a network, if they don't exist already
 void push_nodes_with_component(network_simulation &netlist_network, vector<node> new_nodes, component new_cmp);
 
-double impedance(component com);
+// Returns the impedance of a resistor
+double impedance(component cmp);
 
 //This function takes two nodes and return the conductance term in the conductance matrix.
 double calculate_conductance_between_nodes(node nodeinput1, node nodeinput2);
 
 // Sums all the conductances of a vector of components
 double sum_conductance(vector<component> components);
+
+
+/// ^^^^^tested until here^^^^^
 
 bool is_a_node_voltage_known(node input, node reference_node);
 
