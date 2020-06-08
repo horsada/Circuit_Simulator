@@ -157,42 +157,80 @@ MatrixXd create_i_matrix(network_simulation A, double current_time)
 {
   vector<node> nodes_with_ref_node = A.network_nodes;
   vector<node> nodes_wo_ref_node = create_v_matrix(A);
-
-  int rows = nodes_wo_ref_node;
-  MatrixXd i(rows,1);
-
-  for(int i = 0; i<A.network_components.size();i++){
-		
-		
-
-
+  node reference_node(0);
+	
+  // the following for loop finds the reference node in the circuit and assign it to the reference_node
+  for(int it = 0; it < nodes_with_ref_node.size(); it++){
+	if(nodes_with_ref_node[it].index == 0){
+		reference_node = nodes_with_ref_node[it];
+	}
   }
 
+  //the matrix with 1 column and some rows declared. The number of rows is defined by the number of nodes in the circuit excluding the reference node 
+  int rows = nodes_wo_ref_node.size();
+  MatrixXd I(rows,1);
+  
+  //this does supernodes separation, it finds supernodes, separate them into a pair of nodes, relationship node and non-relationship node
+  vector<pair<node,node>> supernodes;
+  supernodes =  supernode_separation(A.network_nodes, node reference_node);
 
+  //the for loop checks all the nodes and pushes value into the matrix according to different situations.
+  for(int i = 0; i<nodes_wo_ref_node.size();i++){
+		
+	//if it is a known node	
+	if(is_a_node_voltage_known(nodes_wo_ref_node[i],reference_node){
+		for(int c = 0; c < nodes_wo_ref_node[i].connected_components.size();c++){
+			//find the v source that the node is connected to
+			if(nodes_wo_ref_node[i].connected_components[c].component_name[0] == 'V'){
+				double voltage;
+				//voltage is calculated by amplitude*sin(frequency*current time)
+				//see if the positive side or the negative side of the v source is conneceted to the node
+				//positive side to the node
+				if(nodes_wo_ref_node[i].connected_components[c].connected_terminals[0] == nodes_wo_ref_node[i]){
+					voltage = nodes_wo_ref_node[i].connected_components[c].component_value[0] + nodes_wo_ref_node[i].connected_components[c].component_value[1]*sin(nodes_wo_ref_node[i].connected_components[c].component_value[2]*current_time);
+					I(i,1) = voltage;
+				}
+				//negative side to the node
+			    if(nodes_wo_ref_node[i].connected_components[c].connected_terminals[1] == nodes_wo_ref_node[i]){
+					voltage = 0.0 - (nodes_wo_ref_node[i].connected_components[c].component_value[0] + nodes_wo_ref_node[i].connected_components[c].component_value[1]*sin(nodes_wo_ref_node[i].connected_components[c].component_value[2]*current_time);
+                    I(i,1) = voltage;
+				}	
+			}
+		}
+	 }
 
+	//if it is a relationship supernode
+	  for(int s = 0; s < supernode.size(); s++){
+		if(nodes_wo_ref_node[i] == supernodes[s].first){
+		//the positive side of the v source minus the negative side of the v source is equal to the following voltage
+			double voltage;
+			voltage = nodes_wo_ref_node[i].connected_components[c].component_value[0] + nodes_wo_ref_node[i].connected_components[c].component_value[1]*sin(nodes_wo_ref_node[i].connected_components[c].component_value[2]*current_time);
+			I(i,1) = voltage;
+		}
+	  }
 
+	//if it is a non relationship supernode
+	  for(int s = 0; s < supernodes.size(); s++){ 
+		if(nodes_wo_ref_node[i] == supernodes[s].second){
+		// return the sum of I sources going out of the node if the supernode 
+			double current = 0.0;
+			//add the current going out of the first super node
+			current += sum_known_currents(supernodes[s].first, current_time);
+			// add the current going out of the second super node 
+			current += sum_known_currents(supernodes[s].second, current_time);
+			I(i,1) = current;
+		}
+	  }
+	
 
+  //if it is a normal node connected to it.
+  //two situations are included:1 with I sources connected to it, 2 without I sources connected to it
+	 double current;
+	 current = sum_known_currents(nodes_wo_ref_node[i], current_time);
+	 I(i,1) = current;
 
-
-
-
-
-
-
-
-
-  for(int it=0; i<A.network_components.size(); it++)
-  {
-    if(A.network_components[it].component_name.find('i') > -1)
-    {
-
-      if(is_a_node_voltage_known(A.network_nodes[it], A.network_nodes[0]) == true)
-      {
-        i(it,1) = A.network_nodes[it].node_voltage;
-      }
-      else if(r_two_nodes_supernodes(A.network_nodes[it], A.network_nodes[0], ))
-      i(it,1) = A.network_components[it];
     }
-  }
-  return i;
+
+  return I;
 }
+
