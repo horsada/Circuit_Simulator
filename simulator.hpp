@@ -22,6 +22,7 @@ class network_simulation {
 
     int no_of_v_sources();
     int no_of_nodes();
+
 };
 
 
@@ -126,7 +127,7 @@ class independent_i_source: public component {
 ////////////////////////////*/
 class diode: public component {
     string model_name;
-    diode(string device_name, vector<node> connected_nodes, string model_name_from_netlist) {
+    diode(string device_name, vector<node> connectind_nodes, string model_name_from_netlist) {
       component_name = device_name;
       connected_terminals = connected_nodes;
       model_name = model_name_from_netlist;
@@ -173,5 +174,10 @@ bool is_a_node_voltage_known(node input, node reference_node);
 
 bool r_two_nodes_supernodes(independent_v_source vsource, node reference_node);
 
+vector<node> create_v_matrix(network_simulation A);
+
+MatrixXd create_i_matrix(network_simulation A);
+
+double sum_known_currents(vector<component> input);
 
 #endif
