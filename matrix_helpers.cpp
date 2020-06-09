@@ -74,3 +74,77 @@ independent_i_source convert_L_to_isource(L inductor, double timestep){
 	return Ltoisource;
 
 }
+
+//the following function is used to tell the currents through a V source or an I source
+//it calculates the current resulted from other components (not from the source itself) from connected_terminals[0] to connected_terminals[1]
+//output increases when current goes out of terminal[0] , output decreases when current goes out of terminal[1]
+double tell_currents(component input){
+	double output = 0.0;
+	//sum currents going out of terminal[0]
+	for(int i = 0 ; i < input.connected_terminals[0].connected_components.size() ; i++){
+		if(input.connected_terminals[0].connected_components[i].component_name[0] == 'R'){
+			if(input.connected_terminals[0].connected_components[i].connected_terminals[0] == input.connected_terminals[0]){
+				output += (input.connected_terminals[0].connected_components[i].connected_terminals[0].node_voltage - input.connected_terminals[0].connected_components[i].connected_terminals[1].node_voltage) / input.connected_terminals[0].connected_components[i].component_value[0];
+			}
+			if(input.connected_terminals[0].connected_components[i].connected_terminals[1] == input.connected_terminals[0]){
+				output += (input.connected_terminals[0].connected_components[i].connected_terminals[1].node_voltage - input.connected_terminals[0].connected_components[i].connected_terminals[0].node_voltage) / input.connected_terminals[0].connected_components[i].component_value[0];
+			}
+		}
+	}
+	//sum currents going out of terminal[1]
+	for(int = c; c< input.connected_terminals[1].connected_components.size(); c++){
+		if(input.connected_terminals[1].connected_components[c].component_name[0] == 'R'){
+			if(input.connected_terminals[1].connected_components[c].connected_terminals[0] == input.connected_terminals[1]){
+				output -= (input.connected_terminals[1].connected_components[c].connected_terminals[0].node_voltage - input.connected_terminals[1].connected_components[c].connected_terminals[1].node_voltage) / input.connected_terminals[1].connected_components[c].component_value[0];
+			}
+			if(input.connected_terminals[1].connected_components[c].connected_terminals[1] == input.connected_terminals[1]){
+				output -= (input.connected_terminals[1].connected_components[c].connected_terminals[1].node_voltage - input.connected_terminals[1].connected_components[c].connected_terminals[0].node_voltage) / input.connected_terminals[1].connected_components[c].component_value[0];
+			}
+		}
+	}
+	return output;
+}
+
+//the following function should take the version of network_component, where all C and Ls are converted to sources.
+//the output of the function includes the current through all components from the input. The orders are matched.
+vector<double> calculate_current_through_component(vector<component> network_component, double current_time){
+	
+	vector<double> current_column;
+
+	//go through all components
+	//treat different ones differently
+	for(int i = 0 ; i < network_component.size() ; i++){
+		
+		// the current through a resistor is done by ( the node voltage at connected_terminals[0] - the node voltage at connected_terminals[1]) / resistor value.
+		// Also, the i sources connected to the connected_terminals of the resistor are taken into account.
+		// To keep it consistent, its always positive.
+		if(network_component[i].component_name[0] == 'R'){
+			double current_through_R;
+			current_through_R = (network_component[i].connected_terminals[0].node_voltage - network_component[i].connected_terminals[1].node_voltage) / network_component[i].component_value[0];
+			current_through_R = abs(current_through_R);
+			current_column.push_back(current_through_R);
+		}
+	
+		// The current through V shows the current going through V from the positive side of the v source to the negative side of the v source 
+		if(network_component[i].component_name[0] == 'V'){
+			double current_through_V;
+			current_through_V = tell_currents(network_component[i]);
+			current_column.push_back(current_through_V);
+		}
+		
+		//The current through I shows the current going through I from the In side to the Out side.
+		if(network_component[i].component_name[0] == 'I'){
+			double current_through_I;
+			current_through_I = tell_currents(network_component[i]);
+			double value_of_I;
+			value_of_I = network_component[i].component_value[0] + network_component[i].component_value[1]*sin(network_component[i].component_value[2]*current_time);
+			current_through_I += value_of_I;
+			current_column.push_back(current_through_I);
+		}
+	}
+	
+	return current_column;
+	
+}
+
+

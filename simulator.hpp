@@ -189,4 +189,7 @@ int which_is_the_node(vector<node> nodes_wo_ref, node input);
 
 MatrixXd create_G_matrix(network_simulation A);
 
+double tell_currents(component input);
+
+vector<double> calculate_current_through_component(vector<component> network_component, double current_time);
 #endif
