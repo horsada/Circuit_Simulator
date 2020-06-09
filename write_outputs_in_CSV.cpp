@@ -1,6 +1,9 @@
 #include "simulator.hpp"
 #include "dependencies.hpp"
 
+using namespace std;
+using namespace Eigen;
+
 void write_csv_for_output_at_first_row(string filename, vector<node> nodes, vector<component> network_component){
 //this function writes a CSV file with node_index and component names at the top of each column
 	ofstream file;
