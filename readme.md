@@ -14,3 +14,13 @@
     g++ -I eigen/ -std=c++11 helper_functions.cpp test_sandbox.cpp netlist_parser.cpp -o compiled_test
 
 For every compilation, name the output file extension .out, to ensure they are ignored by source control.
+
+
+For calculating the inverse of a matrix by using Eigen library, do
+
+	G = G.inverse(); // assuming A to be a declared matrix
+
+For Matrix-matrix multiplication, do
+
+	G = G.inverse();
+	V = G * I;
