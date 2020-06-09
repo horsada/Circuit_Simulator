@@ -245,9 +245,16 @@ MatrixXd create_G_matrix(network_simulation A){
 	vector<pair<node,node>> supernodes = supernode_separation(A.network_components, reference_node);
 	
 	//the following two for loops addresses different terms in the G matrix. It defines all columns in one row first then defines the columns in the second row...
-	//the "row" for loop checks all the nodes and pushes value into the columns of the row  according to different situations.
+	//the "row" for-loop checks all the nodes and pushes value into the columns of the row  according to different situations.
+	//the whole row is first initiated with normal conductance terms, if the row is a known node or a supernode, the whole row will be overwritten.
 	for(int row = 0; row < num; row++){
 
+
+		 //if it is a normal row with all the conductance terms like G11, G12, G13 and etc.
+         // a normal row is not suppose to trigger any of the modifications of the matrix above
+         for(int column = 0;column <num ; column++){
+             G(row,column) = calculate_conductance_between_nodes(nodes_wo_ref_node[row],nodes_wo_ref_node[column]);
+         }
 
 		//if it is a known node
 		if(is_a_node_voltage_known(nodes_wo_ref_node[row],reference_node)){
@@ -270,19 +277,41 @@ MatrixXd create_G_matrix(network_simulation A){
 			int which_is_negative_supernode;
 			for(int s = 0; s< supernodes.size();s++){
 				if(nodes_wo_ref_node[column] == supernodes[s].first && column == row){
+					//fill the whole row with 0's first
+					for(int fill_zero = 0; fill_zero < num ; fill_zero++){
+						G(row,fill_zero) = 0.0;
+					}
+					//write things like V2*1 + V3*(-1)
 					G(row,column) = 1.0;
-					which_is_negative_supernode = which_is_the_node(nodes_wo_ref_node, supernodes[s].second)
+					which_is_negative_supernode = which_is_the_node(nodes_wo_ref_node, supernodes[s].second);
 					G(row,which_is_negative_supernode) = -1.0;
 				}
 			}
 		}
 		
 		//if it is a non relationship supernode
+		for(int column = 0; column <num ; column++){
+			int which_is_positive_supernode;
+			for(int s = 0 ; s< supernodes.size(); s++){
+				if(nodes_wo_ref_node[column] == supernodes[s].second && column == row){
+				    //fill the whole row with 0's first
+                    for(int fill_zero = 0; fill_zero < num ; fill_zero++){
+                         G(row,fill_zero) = 0.0;
+	                }	
+					which_is_positive_supernode = which_is_the_node(nodes_wo_ref_node, supernodes[s].first);
+					//!!!!!!!!!!!!    sums the conductances
+				    for(int double_column = 0 ; double_column < num ; double_column++){
+						G(row,double_column) = calculate_conductance_between_nodes(nodes_wo_ref_node[row],nodes_wo_ref_node[double_column]) + calculate_conductance_between_nodes(nodes_wo_ref_node[which_is_positive_supernode],nodes_wo_ref_node[double_column]);
+					}
+				}
+					
+			}
+
+		}
 		 
-		 
+		
 	}
-
-
+	return G;
 }
 
 

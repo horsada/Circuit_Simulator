@@ -183,6 +183,10 @@ bool is_a_node_voltage_known(node input, node reference_node);
 
 bool r_two_nodes_supernodes(component, node reference_node);
 
-MatrixXd create_i_matrix(network_simulation A);
+MatrixXd create_i_matrix(network_simulation A, double current_time);
+
+int which_is_the_node(vector<node> nodes_wo_ref, node input);
+
+MatrixXd create_G_matrix(network_simulation A);
 
 #endif
