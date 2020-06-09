@@ -213,3 +213,43 @@ MatrixXd create_i_matrix(network_simulation A, double current_time) {
 
   return I;
 }
+
+
+MatrixXd create_G_matrix(network_simulation A){
+
+	vector<node> nodes_with_ref_node = A.network_nodes;
+	vector<node> nodes_wo_ref_node = create_v_matrix(A);
+	node reference_node(0);
+	
+	// the following for loop finds the reference node in the circuit and assign it to the reference_node
+	for(int it = 0; it < nodes_with_ref_node.size(); it++){
+		if(nodes_with_ref_node[it].index == 0){
+			reference_node = nodes_with_ref_node[it];
+		}
+	}
+
+	//G matrix declared. The number of rows and columns are defined by the number of nodes in the circuit excluding the reference node
+	int num = nodes_wo_ref_node.size();
+	MatrixXd G(num,num);
+
+	//this does supernodes separation, it finds supernodes, separate them into a pair of nodes, relationship node and non-relationship node
+	vector<pair<node,node>> supernodes = supernode_separation(A.network_components, reference_node);
+	
+	//the following two for loops addresses different terms in the G matrix. It defines all columns in one row first then defines the columns in the second row...
+	
+	for(int row = 0; row < num; row++){
+	
+		for(int column = 0 ; column < num ; column++){
+		}
+
+
+
+	}
+
+
+}
+
+
+
+
+
