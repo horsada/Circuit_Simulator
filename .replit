@@ -1,2 +1,0 @@
-language = "c++"
-run = "g++ -I eigen/ helper_functions.cpp nodal_analysis.cpp test_sandbox.cpp -o compiled_files/compiled_test && compiled_files/compiled_test"
