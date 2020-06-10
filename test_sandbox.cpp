@@ -36,33 +36,8 @@ int main() {
     // cout << "idx2.2=" << x[1].second.index << endl;
     // cout << "size=" << x.size() << endl;
 
-
-    for(int i=0 ; i < sim.network_nodes.size(); i++){
-      cout << "index is = " << i << endl;
-      cout << "there are " << sim.network_nodes[i].connected_components.size() << "components connected to N" << sim.network_nodes[i].index << endl;
-      for(component cmp: sim.network_nodes[i].connected_components) {
-        cout << "in node: " << sim.network_nodes[i].index << " there is a component called: " << cmp.component_name << endl;
-        cout << "zero=" << cmp.connected_terminals[0].connected_components.size() << endl << endl;
-      }
-    }
-    cout << endl << endl << endl;
-
-    // MatrixXd current_col = create_i_matrix(sim, 5);
-    // cout << current_col;
-    MatrixXd x = create_i_matrix(sim, 1.0);
-    cout << "I:" << endl << endl << x << endl;
-
-    cout << "VVector" << endl;
-    vector<node> Vvector = create_v_matrix(sim);
-    for(node nd: Vvector){
-      cout << nd.index << endl;
-    }
-
-
-
-
-    // double sigma_I = sum_known_currents(sim.network_nodes[0], 1.0);
-    // cout << "sigma_I at node N" << sim.network_nodes[0].index << " equals: " << sigma_I << endl;
+    //double sigma_I = sum_known_currents(sim.network_nodes[0], 1.0);
+    //cout << "sigma_I at node N" << sim.network_nodes[0].index << " equals: " << sigma_I << endl;
     // vector<node> nds = create_v_matrix(sim);
     // cout << nds.size();
     // for(auto nd: nds) {
@@ -70,6 +45,14 @@ int main() {
     // }
     // MatrixXd x = create_G_matrix(sim);
     // cout << "matrix:" << endl << x << endl;
+	MatrixXd G;
+	G = create_G_matrix(sim);
+	cout << G(0,0) <<"," << G(0,1) <<"," <<G(0,2)<<endl << G(1,0)<< "," << G(1,1) << "," << G(1,2)<< endl << G(2,0) << "," << G(2,1) << "," << G(2,2) << endl;
+	vector<node> V;
+	V = create_v_matrix(sim);
+	for(int i = 0; i < V.size(); i++){
+		cout << V[i].index << endl ;
+	}
 
 }
 

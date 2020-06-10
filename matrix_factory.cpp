@@ -203,117 +203,93 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
   return current_matrix;
 }
 
-int which_is_the_node(vector<node> nodes_wo_ref , node input){
 
-	int counter = 0;
-	for(int i = 0; i < nodes_wo_ref.size(); i++){
-		if(nodes_wo_ref[i] == input){
-			counter = i;
+MatrixXd create_G_matrix(network_simulation A){
+
+	vector<node> nodes_with_ref_node = A.network_nodes;
+	vector<node> nodes_wo_ref_node = create_v_matrix(A);
+	node reference_node(0);
+
+	// the following for loop finds the reference node in the circuit and assign it to the reference_node
+	for(int it = 0; it < nodes_with_ref_node.size(); it++){
+		if(nodes_with_ref_node[it].index == 0){
+			reference_node = nodes_with_ref_node[it];
 		}
 	}
-	return counter;
 
+	//G matrix declared. The number of rows and columns are defined by the number of nodes in the circuit excluding the reference node
+	int num = nodes_wo_ref_node.size();
+	MatrixXd G(num,num);
+
+	//this does supernodes separation, it finds supernodes, separate them into a pair of nodes, relationship node and non-relationship node
+	vector<pair<node,node>> supernodes = supernode_separation(A.network_components, reference_node);
+
+	//the following two for loops addresses different terms in the G matrix. It defines all columns in one row first then defines the columns in the second row...
+	//the "row" for-loop checks all the nodes and pushes value into the columns of the row  according to different situations.
+	//the whole row is first initiated with normal conductance terms, if the row is a known node or a supernode, the whole row will be overwritten.
+	for(int row = 0; row < num; row++){
+
+
+		 //if it is a normal row with all the conductance terms like G11, G12, G13 and etc.
+         // a normal row is not suppose to trigger any of the modifications of the matrix above
+         for(int column = 0;column <num ; column++){
+             G(row,column) = calculate_conductance_between_nodes(nodes_wo_ref_node[row],nodes_wo_ref_node[column]);
+         }
+
+  		 //if it is a known node
+		 if(is_a_node_voltage_known(nodes_wo_ref_node[row],reference_node)){
+
+			for(int column = 0 ; column < num ; column++){
+				//if the column corresponds to the known node, make it 1
+				if(column == row){
+					G(row,column) = 1.0;
+				}
+				//if the column corresponds to the other nodes, make it 0
+				if(column != row){
+					G(row,column) = 0.0;
+				}
+			}
+		}
+
+		//if it is a relationship supernode
+		//the first node in the pair is always on the positive side of the v source
+		for(int column = 0 ; column < num ; column++){
+			int which_is_negative_supernode;
+			for(int s = 0; s< supernodes.size();s++){
+				if(nodes_wo_ref_node[column] == supernodes[s].first && column == row){
+					//fill the whole row with 0's first
+					for(int fill_zero = 0; fill_zero < num ; fill_zero++){
+						G(row,fill_zero) = 0.0;
+					}
+					//write things like V2*1 + V3*(-1)
+					G(row,column) = 1.0;
+					which_is_negative_supernode = which_is_the_node(nodes_wo_ref_node, supernodes[s].second);
+					G(row,which_is_negative_supernode) = -1.0;
+				}
+			}
+		}
+
+		//if it is a non relationship supernode
+		for(int column = 0; column <num ; column++){
+			int which_is_positive_supernode;
+			for(int s = 0 ; s< supernodes.size(); s++){
+				if(nodes_wo_ref_node[column] == supernodes[s].second && column == row){
+				    //fill the whole row with 0's first
+                    for(int fill_zero = 0; fill_zero < num ; fill_zero++){
+                         G(row,fill_zero) = 0.0;
+	                }
+					which_is_positive_supernode = which_is_the_node(nodes_wo_ref_node, supernodes[s].first);
+					//!!!!!!!!!!!!    sums the conductances
+				    for(int double_column = 0 ; double_column < num ; double_column++){
+						G(row,double_column) = calculate_conductance_between_nodes(nodes_wo_ref_node[row],nodes_wo_ref_node[double_column]) + calculate_conductance_between_nodes(nodes_wo_ref_node[which_is_positive_supernode],nodes_wo_ref_node[double_column]);
+					}
+				}
+
+			}
+
+		}
+
+
+	}
+	return G;
 }
-
-//
-// MatrixXd create_G_matrix(network_simulation A){
-//
-// 	vector<node> nodes_with_ref_node = A.network_nodes;
-// 	vector<node> unknown_nodes = create_v_matrix(A);
-// 	node reference_node(0);
-//
-// 	// the following for loop finds the reference node in the circuit and assign it to the reference_node
-// 	for(int it = 0; it < nodes_with_ref_node.size(); it++){
-// 		if(nodes_with_ref_node[it].index == 0){
-// 			reference_node = nodes_with_ref_node[it];
-// 		}
-// 	}
-//
-// 	//G matrix declared. The number of rows and columns are defined by the number of nodes in the circuit excluding the reference node
-// 	int num = unknown_nodes.size();
-// 	MatrixXd G(num,num);
-//
-// 	//this does supernodes separation, it finds supernodes, separate them into a pair of nodes, relationship node and non-relationship node
-// 	vector<pair<node,node>> supernodes = supernode_separation(A.network_components, reference_node);
-//
-// 	//the following two for loops addresses different terms in the G matrix. It defines all columns in one row first then defines the columns in the second row...
-// 	//the "row" for-loop checks all the nodes and pushes value into the columns of the row  according to different situations.
-// 	//the whole row is first initiated with normal conductance terms, if the row is a known node or a supernode, the whole row will be overwritten.
-// 	for(int row = 0; row < num; row++){
-//
-// 		 //if it is a normal row with all the conductance terms like G11, G12, G13 and etc.
-//          // a normal row is not suppose to trigger any of the modifications of the matrix above
-//          for(int column = 0;column <num ; column++){
-//              G(row,column) = calculate_conductance_between_nodes(unknown_nodes[row],unknown_nodes[column]);
-//          }
-//
-// 		//if it is a known node
-// 		if(is_a_node_voltage_known(unknown_nodes[row],reference_node)){
-//
-// 			for(int column = 0 ; column < num ; column++){
-// 				//if the column corresponds to the known node, make it 1
-// 				if(column == row){
-// 					G(row,column) = 1.0;
-// 				}
-// 				//if the column corresponds to the other nodes, make it 0
-// 				if(column != row){
-// 					G(row,column) = 0.0;
-// 				}
-// 			}
-// 		}
-//
-// 		//if it is a relationship supernode
-// 		//the first node in the pair is always on the positive side of the v source
-// 		for(int column = 0 ; column < num ; column++){
-// 			int which_is_negative_supernode;
-// 			for(int s = 0; s< supernodes.size();s++){
-// 				if(unknown_nodes[column] == supernodes[s].first && column == row){
-// 					//fill the whole row with 0's first
-// 					for(int fill_zero = 0; fill_zero < num ; fill_zero++){
-// 						G(row,fill_zero) = 0.0;
-// 					}
-// 					//write things like V2*1 + V3*(-1)
-// 					G(row,column) = 1.0;
-// 					which_is_negative_supernode = which_is_the_node(unknown_nodes, supernodes[s].second);
-// 					G(row,which_is_negative_supernode) = -1.0;
-// 				}
-// 			}
-// 		}
-//
-// 		//if it is a non relationship supernode
-// 		for(int column = 0; column <num ; column++){
-// 			int which_is_positive_supernode;
-// 			for(int s = 0 ; s< supernodes.size(); s++){
-// 				if(unknown_nodes[column] == supernodes[s].second && column == row){
-// 				    //fill the whole row with 0's first
-//                     for(int fill_zero = 0; fill_zero < num ; fill_zero++){
-//                          G(row,fill_zero) = 0.0;
-// 	                }
-// 					which_is_positive_supernode = which_is_the_node(unknown_nodes, supernodes[s].first);
-// 					//!!!!!!!!!!!!    sums the conductances
-// 				    for(int double_column = 0 ; double_column < num ; double_column++){
-// 						G(row,double_column) = calculate_conductance_between_nodes(unknown_nodes[row],unknown_nodes[double_column]) + calculate_conductance_between_nodes(unknown_nodes[which_is_positive_supernode],unknown_nodes[double_column]);
-// 					}
-// 				}
-//
-// 			}
-//
-// 		}
-//
-//
-// 	}
-// 	return G;
-// }
-
-
-/*
-
-i=0
-dbg2
-i=1
-dbg2
-i=2
-dbg2
-Segmentation fault: 11
-
-*/
