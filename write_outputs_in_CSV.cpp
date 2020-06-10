@@ -116,7 +116,8 @@ int main(){
 
 		write_csv_voltage_row(output_file_name, simulation_progress, Vvector); // 3. write the node_voltage into CSV file
 
-		current_through_cmps = calculate_current_through_component(networkcomponents, simulation_progress); // 4. calculate the current through each component
+			
+		current_through_cmps = calculate_current_through_component(networkcomponents,Vvector, simulation_progress); // 4. calculate the current through each component
 
 		write_csv_current_row(output_file_name, current_through_cmps); // 5. write the currents into a CSV file
     
