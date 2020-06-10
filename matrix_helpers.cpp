@@ -55,11 +55,11 @@ double sum_known_currents(node input, double simulation_progress) {
 	double sum_current = 0.0;
 	for(int i = 0 ; i < input.connected_components.size() ; i++){
 		if(input.connected_components[i].component_name[0] == 'I'){
-			if(input.connected_components[i].connected_terminals[0] == input) {
+			if(input.connected_components[i].connected_terminals[1] == input) {
 				sum_current += input.connected_components[i].component_value[0]; // add dc offset
 				sum_current += input.connected_components[i].component_value[1]* sin(input.connected_components[i].component_value[2] * simulation_progress); // add amplitude*sin(frequency*time
 			}
-			if(input.connected_components[i].connected_terminals[1] == input) {
+			if(input.connected_components[i].connected_terminals[0] == input) {
 				sum_current -= input.connected_components[i].component_value[0]; // subtract dc offset
 				sum_current -= input.connected_components[i].component_value[1]* sin(input.connected_components[i].component_value[2] * simulation_progress); // subtract amplitude*sin(frequency*time
 			}

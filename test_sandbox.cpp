@@ -16,7 +16,7 @@ int main() {
     //node1.connected_components = {R1,R2};
 
     // Testing netlist_parser for resistors
-    parse_netlist_line(sim, ".tran 0 10 0 1ms");
+    parse_netlist_line(sim, ".tran 0 10s 0 1ms");
     parse_netlist_line(sim, "V1 N001 0 5");
     parse_netlist_line(sim, "I2 N003 N004 7");
     parse_netlist_line(sim, "R1 N001 N002 10");
@@ -25,8 +25,8 @@ int main() {
     parse_netlist_line(sim, ".end");
 
 
-    // cout << sim.stop_time << endl;
-    // cout << sim.timestep << endl;
+    cout << sim.stop_time << endl;
+    cout << sim.timestep << endl;
 
     // vector<component> components, node reference_node
     // vector<pair<node, node>> x = supernode_separation(sim.network_components, sim.network_nodes[0]);
