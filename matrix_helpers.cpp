@@ -159,50 +159,52 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 	double output = 0.0;
 	//sum currents going out of terminal[0]
 	int which_is_node0 = which_is_the_node(Vvector, input.connected_terminals[0]);
-
-	for(int i = 0 ; i < Vvector[which_is_node0].connected_components.size() ; i++){
-		
-		if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'R'){
-			if(Vvector[which_is_node0].connected_components[i].connected_terminals[0] == Vvector[which_is_node0]){
-				output += calculate_current_through_R(Vvector[which_is_node0].connected_components[i], Vvector);
+	int which_is_node1 = which_is_the_node(Vvector, input.connected_terminals[1]);
+	if(input.connected_terminals[1].index == 0){ // if input.connected_terminals[1] is not in Vvector, this is because Vvector doesn't contain the reference node.
+		for(int i = 0 ; i < Vvector[which_is_node0].connected_components.size() ; i++){
+				
+			if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'R' && Vvector[which_is_node0].connected_components[i].connected_terminals[0].index !=0){
+				if(Vvector[which_is_node0].connected_components[i].connected_terminals[0] == Vvector[which_is_node0]){
+					output += calculate_current_through_R(Vvector[which_is_node0].connected_components[i], Vvector);
+				}
+				if(Vvector[which_is_node0].connected_components[i].connected_terminals[1] == Vvector[which_is_node0]){
+					output -= calculate_current_through_R(input.connected_terminals[0].connected_components[i], Vvector);
+				}
 			}
-			if(Vvector[which_is_node0].connected_components[i].connected_terminals[1] == Vvector[which_is_node0]){
-				output -= calculate_current_through_R(input.connected_terminals[0].connected_components[i], Vvector);
+			if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'I'){
+				if(Vvector[which_is_node0].connected_components[i].connected_terminals[0] == Vvector[which_is_node0]){
+					output += Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
+				}
+				if(Vvector[which_is_node0].connected_components[i].connected_terminals[1] == Vvector[which_is_node0]){
+					output -= Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
+	
+				}
 			}
 		}
-		if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'I'){
-			if(Vvector[which_is_node0].connected_components[i].connected_terminals[0] == Vvector[which_is_node0]){
-				output += Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
-			}
-			if(Vvector[which_is_node0].connected_components[i].connected_terminals[1] == Vvector[which_is_node0]){
-				output -= Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
 	
+	}else{
+		for(int c = 0; c< input.connected_terminals[1].connected_components.size(); c++){
+			if(input.connected_terminals[1].connected_components[c].component_name[0] == 'R'){
+				if(input.connected_terminals[1].connected_components[c].connected_terminals[0] == input.connected_terminals[1]){
+					output -= calculate_current_through_R(input.connected_terminals[0].connected_components[c], Vvector);
+				}
+				if(input.connected_terminals[1].connected_components[c].connected_terminals[1] == input.connected_terminals[1]){
+					output += calculate_current_through_R(input.connected_terminals[0].connected_components[c], Vvector);
+				}
 			}
+			if(input.connected_terminals[0].connected_components[c].component_name[0] == 'I'){
+				if(input.connected_terminals[0].connected_components[c].connected_terminals[0] == input.connected_terminals[0]){
+					output -= input.connected_terminals[0].connected_components[c].component_value[0] + input.connected_terminals[0].connected_components[c].component_value[1]*sin(input.connected_terminals[0].connected_components[c].component_value[2]*simulation_progress);
+				}
+				if(input.connected_terminals[0].connected_components[c].connected_terminals[1] == input.connected_terminals[0]){
+					output += input.connected_terminals[0].connected_components[c].component_value[0] + input.connected_terminals[0].connected_components[c].component_value[1]*sin(input.connected_terminals[0].connected_components[c].component_value[2]*simulation_progress);
+
+				}
+			}
+	
 		}
 	}
-	/*
-	//sum currents going out of terminal[1]
-	for(int c = 0; c< input.connected_terminals[1].connected_components.size(); c++){
-		if(input.connected_terminals[1].connected_components[c].component_name[0] == 'R'){
-			if(input.connected_terminals[1].connected_components[c].connected_terminals[0] == input.connected_terminals[1]){
-				output -= calculate_current_through_R(input.connected_terminals[0].connected_components[c], Vvector);
-			}
-			if(input.connected_terminals[1].connected_components[c].connected_terminals[1] == input.connected_terminals[1]){
-				output += calculate_current_through_R(input.connected_terminals[0].connected_components[c], Vvector);
-			}
-		}
-		if(input.connected_terminals[0].connected_components[c].component_name[0] == 'I'){
-             if(input.connected_terminals[0].connected_components[c].connected_terminals[0] == input.connected_terminals[0]){
-                 output -= input.connected_terminals[0].connected_components[c].component_value[0] + input.connected_terminals[0].connected_components[c].component_value[1]*sin(input.connected_terminals[0].connected_components[c].component_value[2]*simulation_progress);
-             }
-             if(input.connected_terminals[0].connected_components[c].connected_terminals[1] == input.connected_terminals[0]){
-                 output += input.connected_terminals[0].connected_components[c].component_value[0] + input.connected_terminals[0].connected_components[c].component_value[1]*sin(input.connected_terminals[0].connected_components[c].component_value[2]*simulation_progress);
-
-             }
-         }
 	
-	}
-	*/
 	return output;
 }
 
