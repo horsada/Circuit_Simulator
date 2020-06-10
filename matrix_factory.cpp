@@ -134,7 +134,7 @@ vector<pair<node,node>> supernode_separation(vector<component> components, node 
 	return output;
 
 }
-
+/*
 MatrixXd create_i_matrix(network_simulation A, double current_time) {
   vector<node> nodes_with_ref_node = A.network_nodes;
   vector<node> nodes_wo_ref_node = create_v_matrix(A);
@@ -213,7 +213,7 @@ MatrixXd create_i_matrix(network_simulation A, double current_time) {
 
   return I;
 }
-
+*/
 int which_is_the_node(vector<node> nodes_wo_ref , node input){
 
 	int counter = 0;
@@ -223,7 +223,7 @@ int which_is_the_node(vector<node> nodes_wo_ref , node input){
 		}
 	}
 	return counter;
-
+}
 MatrixXd create_G_matrix(network_simulation A){
 
 	vector<node> nodes_with_ref_node = A.network_nodes;
@@ -256,8 +256,8 @@ MatrixXd create_G_matrix(network_simulation A){
              G(row,column) = calculate_conductance_between_nodes(nodes_wo_ref_node[row],nodes_wo_ref_node[column]);
          }
 
-		//if it is a known node
-		if(is_a_node_voltage_known(nodes_wo_ref_node[row],reference_node)){
+  		 //if it is a known node
+		 if(is_a_node_voltage_known(nodes_wo_ref_node[row],reference_node)){
 		
 			for(int column = 0 ; column < num ; column++){
 				//if the column corresponds to the known node, make it 1
@@ -313,7 +313,6 @@ MatrixXd create_G_matrix(network_simulation A){
 	}
 	return G;
 }
-
 
 
 

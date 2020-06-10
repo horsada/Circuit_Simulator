@@ -52,7 +52,7 @@ bool r_two_nodes_supernodes(component cmp, node reference_node) {
 
 
 //!!!!!  Here the first term in connected_terminals vector of the components is assumed to be positive, the second one is negative    !!!!!!
-
+/*
 //capacitors need to be replaced by voltage sources at different time steps.
 //capacitors are closed circuit in the beginning.
 independent_v_source convert_C_to_vsource(C capacitor, double timestep){
@@ -74,7 +74,7 @@ independent_i_source convert_L_to_isource(L inductor, double timestep){
 	return Ltoisource;
 
 }
-
+*/
 //the following function is used to tell the currents through a V source or an I source
 //it calculates the current resulted from other components (not from the source itself) from connected_terminals[0] to connected_terminals[1]
 //output increases when current goes out of terminal[0] , output decreases when current goes out of terminal[1]
@@ -92,7 +92,7 @@ double tell_currents(component input){
 		}
 	}
 	//sum currents going out of terminal[1]
-	for(int = c; c< input.connected_terminals[1].connected_components.size(); c++){
+	for(int c = 0; c< input.connected_terminals[1].connected_components.size(); c++){
 		if(input.connected_terminals[1].connected_components[c].component_name[0] == 'R'){
 			if(input.connected_terminals[1].connected_components[c].connected_terminals[0] == input.connected_terminals[1]){
 				output -= (input.connected_terminals[1].connected_components[c].connected_terminals[0].node_voltage - input.connected_terminals[1].connected_components[c].connected_terminals[1].node_voltage) / input.connected_terminals[1].connected_components[c].component_value[0];
