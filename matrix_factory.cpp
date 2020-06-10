@@ -122,8 +122,6 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
 
   // The for loop checks all the nodes and pushes value into the matrix according to different situations.
   for(int i = 0; i < unknown_nodes.size(); i++) {
-    cout << "following node_index active: " << unknown_nodes[i].index << endl;
-    cout << "dbg2;i=" << i << endl;
     // For a regular node (no supernode), the current sources are summed
     double current;
     current = sum_known_currents(unknown_nodes[i], simulation_progress);
@@ -131,7 +129,6 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
 
     // If it is a node with known voltage, set the current entry to voltage at that node
     if(is_a_node_voltage_known(unknown_nodes[i],reference_node)) {
-      cout << "node voltage is known" << endl;
     	for(component cmp: unknown_nodes[i].connected_components) {
     		//find the v source that the node is connected to
     		if(cmp.component_name[0] == 'V'){

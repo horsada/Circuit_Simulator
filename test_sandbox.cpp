@@ -19,9 +19,9 @@ int main() {
     parse_netlist_line(sim, ".tran 0 10 0 1ms");
     parse_netlist_line(sim, "V1 N001 0 5");
     parse_netlist_line(sim, "I2 N003 N004 7");
-    parse_netlist_line(sim, "R1 N001 N002 1k");
-    parse_netlist_line(sim, "R2 N002 N003 1.2k");
-    parse_netlist_line(sim, "R3 0 N004 1.5k");
+    parse_netlist_line(sim, "R1 N001 N002 10");
+    parse_netlist_line(sim, "R2 N002 N003 15");
+    parse_netlist_line(sim, "R3 0 N004 20");
     parse_netlist_line(sim, ".end");
 
 
@@ -45,14 +45,19 @@ int main() {
     // }
     // MatrixXd x = create_G_matrix(sim);
     // cout << "matrix:" << endl << x << endl;
-	MatrixXd G;
-	G = create_G_matrix(sim);
-	cout << G(0,0) <<"," << G(0,1) <<"," <<G(0,2)<<endl << G(1,0)<< "," << G(1,1) << "," << G(1,2)<< endl << G(2,0) << "," << G(2,1) << "," << G(2,2) << endl;
-	vector<node> V;
-	V = create_v_matrix(sim);
-	for(int i = 0; i < V.size(); i++){
-		cout << V[i].index << endl ;
-	}
+
+  	MatrixXd G = create_G_matrix(sim);
+  	cout << "G_matrix:" << endl << G << endl << endl;
+
+    cout << "V_matrix:" << endl;
+    vector<node> V;
+    V = create_v_matrix(sim);
+    for(int i = 0; i < V.size(); i++){
+      cout << V[i].index << endl ;
+    }
+
+  	MatrixXd I = create_i_matrix(sim, 5.0);
+  	cout << endl << endl << "I_matrix:" << endl << I << endl << endl;
 
 }
 
