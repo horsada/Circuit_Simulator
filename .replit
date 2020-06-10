@@ -1,0 +1,2 @@
+language = "cpp"
+run = "g++ -I eigen/ -std=c++11 matrix_factory.cpp matrix_helpers.cpp netlist_parser_helpers.cpp netlist_parser.cpp write_outputs_in_CSV.cpp -o compiled_test.out"

@@ -192,4 +192,6 @@ MatrixXd create_G_matrix(network_simulation A);
 double tell_currents(component input);
 
 vector<double> calculate_current_through_component(vector<component> network_component, double current_time);
+
+vector<component> convert_CLs_to_sources(vector<component> network_components);
 #endif

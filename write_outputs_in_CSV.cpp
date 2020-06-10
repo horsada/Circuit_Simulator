@@ -85,7 +85,10 @@ int main(){
 
 	double simulation_progress = 0;
 	vector<double> current_through_cmps;
+
 	vector<component> networkcomponents = sim.network_components; // !!!!! This line needs to be changed after C and L are added
+  // conver cl to source(networkcomponents)
+  
 	MatrixXd Imatrix;
 	MatrixXd Gmatrix;
 	MatrixXd Vmatrix;
@@ -102,8 +105,7 @@ int main(){
 	// 5.write the currents into a CSV file
 	while(simulation_progress < stoptime){
 
-		// printProgress(simulation_progress*100/stoptime);
-
+    
 		Imatrix = create_i_matrix(sim,simulation_progress);
 		Gmatrix = create_G_matrix(sim);
 		Gmatrix = Gmatrix.inverse(); //Get the inverse of the G matrix
@@ -117,6 +119,10 @@ int main(){
 		current_through_cmps = calculate_current_through_component(networkcomponents, simulation_progress); // 4. calculate the current through each component
 
 		write_csv_current_row(output_file_name, current_through_cmps); // 5. write the currents into a CSV file
+    
+    //function that updates the value of the sources that CLs become
+    //it itrates through all components find the ones which start with "I_" or "V_".
+    //change their value based on pervious condition.
 
 		simulation_progress += time_step;
 	}

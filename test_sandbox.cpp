@@ -19,9 +19,6 @@ int main() {
     parse_netlist_line(sim, ".tran 0 10s 0 1ms");
     parse_netlist_line(sim, "V1 N001 0 5");
     parse_netlist_line(sim, "I2 N003 N004 7");
-    parse_netlist_line(sim, "R1 N001 N002 10");
-    parse_netlist_line(sim, "R2 N002 N003 15");
-    parse_netlist_line(sim, "R3 0 N004 20");
     parse_netlist_line(sim, ".end");
 
 
