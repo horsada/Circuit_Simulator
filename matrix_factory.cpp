@@ -94,124 +94,113 @@ vector<node> create_v_matrix(network_simulation A) {
   assert(1); return network_nodes_without_ref_node; // to avoid compiler warning
 }
 
-double sum_known_currents(node input, double simulation_progress) {
-//this function sums up the currents going out of one node at a specific time
-	double sum_current = 0.0;
-	for(int i = 0 ; i < input.connected_components.size() ; i++){
-		if(input.connected_components[i].component_name[0] == 'I'){
-			if(input.connected_components[i].connected_terminals[0] == input) {
-				sum_current += input.connected_components[i].component_value[0]; // add dc offset
-				sum_current += input.connected_components[i].component_value[1]* sin(input.connected_components[i].component_value[2] * simulation_progress); // add amplitude*sin(frequency*time
-			}
-			if(input.connected_components[i].connected_terminals[1] == input) {
-				sum_current -= input.connected_components[i].component_value[0]; // subtract dc offset
-				sum_current -= input.connected_components[i].component_value[1]* sin(input.connected_components[i].component_value[2] * simulation_progress); // subtract amplitude*sin(frequency*time
-			}
-		}
-	}
-	return sum_current;
-}
-
-// Returns pairs of normal nodes, which represent a supernode.
-vector<pair<node,node>> supernode_separation(vector<component> components, node reference_node) {
-  // A supernode consists of two nodes. In the matrix a supernode occupies two lines. Each of the two nodes is separated
-  //this function takes in the components in the network simulation and checks supernodes.
-  //This function outputs a vector of vector of nodes.
-  //The first vector of nodes contains the relationship node in the supernode, e.g. 1*V2 - 1*V3 = 10
-  //The second vector of nodes contains the non relationship node in the supernode, e.g. G11+G21, G12+G22, G13+G23 row
-  //This function finds the v sources and does supernode separation
-	vector<node> relationship_node;
-	vector<node> non_relationship_node;
-  vector<pair<node,node>> output;
-	for(int i = 0 ; i < components.size(); i++){
-		if(components[i].component_name[0] == 'V'){
-			if(r_two_nodes_supernodes(components[i], reference_node)){
-				//the positive side of the V source is going to be the relationship node (assumed to be, it doesnt matter if it's the relationship one or the non relationship one
-        output.push_back({components[i].connected_terminals[0], components[i].connected_terminals[1]});
-			}
-		}
-	}
-	return output;
-
-}
-
-MatrixXd create_i_matrix(network_simulation A, double current_time) {
+// This functoin constructs the current single-column matrix  (I in G*V = I)
+MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
   vector<node> nodes_with_ref_node = A.network_nodes;
-  vector<node> nodes_wo_ref_node = create_v_matrix(A);
+  vector<node> unknown_nodes = create_v_matrix(A);
   node reference_node(0);
 
-  // the following for loop finds the reference node in the circuit and assign it to the reference_node
+  // the following for loop finds the reference node in the circuit and assigns it to the reference_node
   for(int it = 0; it < nodes_with_ref_node.size(); it++){
-	if(nodes_with_ref_node[it].index == 0){
-		reference_node = nodes_with_ref_node[it];
-	}
+    if(nodes_with_ref_node[it].index == 0){
+      reference_node = nodes_with_ref_node[it];
+    }
   }
 
-  //the matrix with 1 column and some rows declared. The number of rows is defined by the number of nodes in the circuit excluding the reference node
-  int rows = nodes_wo_ref_node.size();
-  MatrixXd I(rows,1);
+
+  //the matrix with 1 column and some rows declared. The number of rows is defined by the number of unknown voltage nodes in the circuit
+  int rows = unknown_nodes.size();
+  MatrixXd current_matrix(rows,1);
 
   //this does supernodes separation, it finds supernodes, separate them into a pair of nodes, relationship node and non-relationship node
   vector<pair<node,node>> supernodes = supernode_separation(A.network_components, reference_node);
 
-    //the for loop checks all the nodes and pushes value into the matrix according to different situations.
-    for(int i = 0; i<nodes_wo_ref_node.size();i++){
+  // for(int a=0 ; a < A.network_components.size(); a++){
+  //   cout << "index is = " << a << endl;
+  //   cout << "isthiszero=" << A.network_components[a].connected_terminals[0].connected_components.size() << endl;
+  // }
 
-    //if it is a known node
-    if(is_a_node_voltage_known(nodes_wo_ref_node[i],reference_node){
-    	for(int c = 0; c < nodes_wo_ref_node[i].connected_components.size();c++){
+  // The for loop checks all the nodes and pushes value into the matrix according to different situations.
+  for(int i = 0; i < unknown_nodes.size(); i++) {
+    cout << "following node_index active: " << unknown_nodes[i].index << endl;
+    cout << "dbg2;i=" << i << endl;
+    // For a regular node (no supernode), the current sources are summed
+    double current;
+    current = sum_known_currents(unknown_nodes[i], simulation_progress);
+    current_matrix(i,0) = current;
+
+    // If it is a node with known voltage, set the current entry to voltage at that node
+    if(is_a_node_voltage_known(unknown_nodes[i],reference_node)) {
+      cout << "node voltage is known" << endl;
+    	for(component cmp: unknown_nodes[i].connected_components) {
     		//find the v source that the node is connected to
-    		if(nodes_wo_ref_node[i].connected_components[c].component_name[0] == 'V'){
+    		if(cmp.component_name[0] == 'V'){
     			double voltage;
-    			//voltage is calculated by amplitude*sin(frequency*current time)
-    			//see if the positive side or the negative side of the v source is conneceted to the node
-    			//positive side to the node
-    			if(nodes_wo_ref_node[i].connected_components[c].connected_terminals[0] == nodes_wo_ref_node[i]){
-    				voltage = nodes_wo_ref_node[i].connected_components[c].component_value[0] + nodes_wo_ref_node[i].connected_components[c].component_value[1]*sin(nodes_wo_ref_node[i].connected_components[c].component_value[2]*current_time);
-    				I(i,1) = voltage;
+    			// Voltage is calculated by amplitude*sin(frequency*current time)
+    			// Check if the positive side or the negative side of the v source is conneceted to the node
+
+    			// Positive side to the node
+    			if(cmp.connected_terminals[0] == unknown_nodes[i]){
+    				voltage = cmp.component_value[0] + cmp.component_value[1]*sin(cmp.component_value[2]*simulation_progress);
+    				current_matrix(i,0) = voltage;
     			}
-    			//negative side to the node
-    		    if(nodes_wo_ref_node[i].connected_components[c].connected_terminals[1] == nodes_wo_ref_node[i]){
-    				voltage = 0.0 - (nodes_wo_ref_node[i].connected_components[c].component_value[0] + nodes_wo_ref_node[i].connected_components[c].component_value[1]*sin(nodes_wo_ref_node[i].connected_components[c].component_value[2]*current_time);
-                      I(i,1) = voltage;
+    			// Negative side to the node
+    		  if(cmp.connected_terminals[1] == unknown_nodes[i]){
+    				voltage = 0.0 - (cmp.component_value[0] + cmp.component_value[1]*sin(cmp.component_value[2]*simulation_progress));
+            current_matrix(i,0) = voltage;
     			}
     		}
-    	}
+  	   }
      }
 
-    //if it is a relationship supernode
-    for(int s = 0; s < supernode.size(); s++){
-    	if(nodes_wo_ref_node[i] == supernodes[s].first){
-    	//the positive side of the v source minus the negative side of the v source is equal to the following voltage
-    		double voltage;
-    		voltage = nodes_wo_ref_node[i].connected_components[c].component_value[0] + nodes_wo_ref_node[i].connected_components[c].component_value[1]*sin(nodes_wo_ref_node[i].connected_components[c].component_value[2]*current_time);
-    		I(i,1) = voltage;
-    	}
-    }
+    // For a supernode, there are two matrix-line entries. One line represents a relationship between nodes, the other line represents the total conductance/currents of the two nodes forming a supernode
 
-    //if it is a non relationship supernode
-    for(int s = 0; s < supernodes.size(); s++){
-    	if(nodes_wo_ref_node[i] == supernodes[s].second){
-    	// return the sum of I sources going out of the node if the supernode
+    // For the node-relationship entry, the source value is used.
+    for(pair<node,node> snd: supernodes){
+
+      // If the current node is a supernode
+    	if(unknown_nodes[i] == snd.first){
+        //cout << "node-relationship entry" << endl;
+        vector<double> vsource_values;
+        //cout << "dbg4=" << snd.first.connected_components.size() << endl;
+        // Iterate through the components of the supernode(node 1 of supernode)
+
+        for(component cmp1: unknown_nodes[i].connected_components){
+          //cout << "dbg5" << endl;
+          // Iterate through the components of the supernode(node 2 of supernode
+          int which = which_is_the_node(unknown_nodes, snd.second);
+          for(component cmp2: unknown_nodes[which].connected_components){
+            //cout << "dbg6" << endl;
+            if(cmp1 == cmp2 && cmp1.component_name[0] == 'V' && cmp2.component_name[0] == 'V'){
+              // The voltage source that caused the node to be classified as a supernode
+              vsource_values = cmp1.component_value;
+              //cout << "dbg7" << endl;
+            }
+          }
+        }
+
+        double voltage = vsource_values[0] + vsource_values[1]*sin(vsource_values[2]*simulation_progress);
+    		current_matrix(i,0) = voltage;
+    	}
+
+      // If it is a non-relationship supernode
+    	if(unknown_nodes[i] == snd.second){
+        //cout << "non-relationship summed current entry" << endl;
+    	  // return the sum of I sources going out of the node if the supernode
     		double current = 0.0;
     		//add the current going out of the first super node
-    		current += sum_known_currents(supernodes[s].first, current_time);
+        int which = which_is_the_node(unknown_nodes, snd.first);
+    		current += sum_known_currents(unknown_nodes[which], simulation_progress);
     		// add the current going out of the second super node
-    		current += sum_known_currents(supernodes[s].second, current_time);
-    		I(i,1) = current;
+    		current += sum_known_currents(unknown_nodes[i], simulation_progress);
+    		current_matrix(i,0) = current;
     	}
     }
 
+  }
 
-  //if it is a normal node connected to it.
-  //two situations are included:1 with I sources connected to it, 2 without I sources connected to it
-	 double current;
-	 current = sum_known_currents(nodes_wo_ref_node[i], current_time);
-	 I(i,1) = current;
-
-    }
-
-  return I;
+  // Finally return the assembled current matrix
+  return current_matrix;
 }
 
 int which_is_the_node(vector<node> nodes_wo_ref , node input){
@@ -224,97 +213,107 @@ int which_is_the_node(vector<node> nodes_wo_ref , node input){
 	}
 	return counter;
 
-MatrixXd create_G_matrix(network_simulation A){
-
-	vector<node> nodes_with_ref_node = A.network_nodes;
-	vector<node> nodes_wo_ref_node = create_v_matrix(A);
-	node reference_node(0);
-	
-	// the following for loop finds the reference node in the circuit and assign it to the reference_node
-	for(int it = 0; it < nodes_with_ref_node.size(); it++){
-		if(nodes_with_ref_node[it].index == 0){
-			reference_node = nodes_with_ref_node[it];
-		}
-	}
-
-	//G matrix declared. The number of rows and columns are defined by the number of nodes in the circuit excluding the reference node
-	int num = nodes_wo_ref_node.size();
-	MatrixXd G(num,num);
-
-	//this does supernodes separation, it finds supernodes, separate them into a pair of nodes, relationship node and non-relationship node
-	vector<pair<node,node>> supernodes = supernode_separation(A.network_components, reference_node);
-	
-	//the following two for loops addresses different terms in the G matrix. It defines all columns in one row first then defines the columns in the second row...
-	//the "row" for-loop checks all the nodes and pushes value into the columns of the row  according to different situations.
-	//the whole row is first initiated with normal conductance terms, if the row is a known node or a supernode, the whole row will be overwritten.
-	for(int row = 0; row < num; row++){
-
-
-		 //if it is a normal row with all the conductance terms like G11, G12, G13 and etc.
-         // a normal row is not suppose to trigger any of the modifications of the matrix above
-         for(int column = 0;column <num ; column++){
-             G(row,column) = calculate_conductance_between_nodes(nodes_wo_ref_node[row],nodes_wo_ref_node[column]);
-         }
-
-		//if it is a known node
-		if(is_a_node_voltage_known(nodes_wo_ref_node[row],reference_node)){
-		
-			for(int column = 0 ; column < num ; column++){
-				//if the column corresponds to the known node, make it 1
-				if(column == row){
-					G(row,column) = 1.0;
-				}
-				//if the column corresponds to the other nodes, make it 0
-				if(column != row){
-					G(row,column) = 0.0;
-				}
-			}
-		}
-
-		//if it is a relationship supernode
-		//the first node in the pair is always on the positive side of the v source
-		for(int column = 0 ; column < num ; column++){
-			int which_is_negative_supernode;
-			for(int s = 0; s< supernodes.size();s++){
-				if(nodes_wo_ref_node[column] == supernodes[s].first && column == row){
-					//fill the whole row with 0's first
-					for(int fill_zero = 0; fill_zero < num ; fill_zero++){
-						G(row,fill_zero) = 0.0;
-					}
-					//write things like V2*1 + V3*(-1)
-					G(row,column) = 1.0;
-					which_is_negative_supernode = which_is_the_node(nodes_wo_ref_node, supernodes[s].second);
-					G(row,which_is_negative_supernode) = -1.0;
-				}
-			}
-		}
-		
-		//if it is a non relationship supernode
-		for(int column = 0; column <num ; column++){
-			int which_is_positive_supernode;
-			for(int s = 0 ; s< supernodes.size(); s++){
-				if(nodes_wo_ref_node[column] == supernodes[s].second && column == row){
-				    //fill the whole row with 0's first
-                    for(int fill_zero = 0; fill_zero < num ; fill_zero++){
-                         G(row,fill_zero) = 0.0;
-	                }	
-					which_is_positive_supernode = which_is_the_node(nodes_wo_ref_node, supernodes[s].first);
-					//!!!!!!!!!!!!    sums the conductances
-				    for(int double_column = 0 ; double_column < num ; double_column++){
-						G(row,double_column) = calculate_conductance_between_nodes(nodes_wo_ref_node[row],nodes_wo_ref_node[double_column]) + calculate_conductance_between_nodes(nodes_wo_ref_node[which_is_positive_supernode],nodes_wo_ref_node[double_column]);
-					}
-				}
-					
-			}
-
-		}
-		 
-		
-	}
-	return G;
 }
 
+//
+// MatrixXd create_G_matrix(network_simulation A){
+//
+// 	vector<node> nodes_with_ref_node = A.network_nodes;
+// 	vector<node> unknown_nodes = create_v_matrix(A);
+// 	node reference_node(0);
+//
+// 	// the following for loop finds the reference node in the circuit and assign it to the reference_node
+// 	for(int it = 0; it < nodes_with_ref_node.size(); it++){
+// 		if(nodes_with_ref_node[it].index == 0){
+// 			reference_node = nodes_with_ref_node[it];
+// 		}
+// 	}
+//
+// 	//G matrix declared. The number of rows and columns are defined by the number of nodes in the circuit excluding the reference node
+// 	int num = unknown_nodes.size();
+// 	MatrixXd G(num,num);
+//
+// 	//this does supernodes separation, it finds supernodes, separate them into a pair of nodes, relationship node and non-relationship node
+// 	vector<pair<node,node>> supernodes = supernode_separation(A.network_components, reference_node);
+//
+// 	//the following two for loops addresses different terms in the G matrix. It defines all columns in one row first then defines the columns in the second row...
+// 	//the "row" for-loop checks all the nodes and pushes value into the columns of the row  according to different situations.
+// 	//the whole row is first initiated with normal conductance terms, if the row is a known node or a supernode, the whole row will be overwritten.
+// 	for(int row = 0; row < num; row++){
+//
+// 		 //if it is a normal row with all the conductance terms like G11, G12, G13 and etc.
+//          // a normal row is not suppose to trigger any of the modifications of the matrix above
+//          for(int column = 0;column <num ; column++){
+//              G(row,column) = calculate_conductance_between_nodes(unknown_nodes[row],unknown_nodes[column]);
+//          }
+//
+// 		//if it is a known node
+// 		if(is_a_node_voltage_known(unknown_nodes[row],reference_node)){
+//
+// 			for(int column = 0 ; column < num ; column++){
+// 				//if the column corresponds to the known node, make it 1
+// 				if(column == row){
+// 					G(row,column) = 1.0;
+// 				}
+// 				//if the column corresponds to the other nodes, make it 0
+// 				if(column != row){
+// 					G(row,column) = 0.0;
+// 				}
+// 			}
+// 		}
+//
+// 		//if it is a relationship supernode
+// 		//the first node in the pair is always on the positive side of the v source
+// 		for(int column = 0 ; column < num ; column++){
+// 			int which_is_negative_supernode;
+// 			for(int s = 0; s< supernodes.size();s++){
+// 				if(unknown_nodes[column] == supernodes[s].first && column == row){
+// 					//fill the whole row with 0's first
+// 					for(int fill_zero = 0; fill_zero < num ; fill_zero++){
+// 						G(row,fill_zero) = 0.0;
+// 					}
+// 					//write things like V2*1 + V3*(-1)
+// 					G(row,column) = 1.0;
+// 					which_is_negative_supernode = which_is_the_node(unknown_nodes, supernodes[s].second);
+// 					G(row,which_is_negative_supernode) = -1.0;
+// 				}
+// 			}
+// 		}
+//
+// 		//if it is a non relationship supernode
+// 		for(int column = 0; column <num ; column++){
+// 			int which_is_positive_supernode;
+// 			for(int s = 0 ; s< supernodes.size(); s++){
+// 				if(unknown_nodes[column] == supernodes[s].second && column == row){
+// 				    //fill the whole row with 0's first
+//                     for(int fill_zero = 0; fill_zero < num ; fill_zero++){
+//                          G(row,fill_zero) = 0.0;
+// 	                }
+// 					which_is_positive_supernode = which_is_the_node(unknown_nodes, supernodes[s].first);
+// 					//!!!!!!!!!!!!    sums the conductances
+// 				    for(int double_column = 0 ; double_column < num ; double_column++){
+// 						G(row,double_column) = calculate_conductance_between_nodes(unknown_nodes[row],unknown_nodes[double_column]) + calculate_conductance_between_nodes(unknown_nodes[which_is_positive_supernode],unknown_nodes[double_column]);
+// 					}
+// 				}
+//
+// 			}
+//
+// 		}
+//
+//
+// 	}
+// 	return G;
+// }
 
 
+/*
 
+i=0
+dbg2
+i=1
+dbg2
+i=2
+dbg2
+Segmentation fault: 11
 
+*/
