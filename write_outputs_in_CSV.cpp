@@ -76,7 +76,7 @@ int main(){
 		}
 		newfile.close();
     }
-	cout << "🔄 Netlist parsing complete. Running simulation with following paramters: " << endl;
+	cout << "🔄 Netlist parsing complete. Running simulation with following paramters: ";
 
 	//the process of how sim is produced by using netlist paser is not done !!!!
 	double time_step = sim.timestep;
@@ -84,16 +84,15 @@ int main(){
 
 	cout << "time_step=" << time_step << "; stoptime=" << stoptime << endl << endl;
 
-
-	sim.network_components = convert_CLs_to_sources(sim.network_components);
-	vector<component> networkcomponents = sim.network_components;
-
-
 	// The voltage vector containing unknown voltage nodes
 	vector<node> Vvector = create_v_matrix(sim);
+	
+	// Writing the column names into the CSV file; This happens before C/L are converted to sources.
+	write_csv_column_specifiers(output_file_name, Vvector, sim.network_components);
 
-	// Writing the column names into the CSV file
-	write_csv_column_specifiers(output_file_name, Vvector, networkcomponents);
+	// Converting conductors and capacitors to their source equivalents
+	sim.network_components = convert_CLs_to_sources(sim.network_components);
+
 
 	/*
 		Simulation Loop
@@ -121,20 +120,13 @@ int main(){
 		write_csv_voltage_row(output_file_name, simulation_progress, Vvector);
 
 		// 3 Calculate currents through components
-		vector<double> current_through_cmps = calculate_current_through_component(networkcomponents, Vvector, simulation_progress);
+		vector<double> current_through_cmps = calculate_current_through_component(sim.network_components, Vvector, simulation_progress);
 
 		// 4 Write currents to CSV
 		write_csv_current_row(output_file_name, current_through_cmps);
 
 		// 5 Update the source equivalents for inductors and capacitors
-  	vector<component> x = update_source_equivalents(networkcomponents, Vvector, current_through_cmps, simulation_progress, time_step);
-
-		for(int i=0; i<sim.network_components.size(); i++) {
-			cout << "previous_value=" << sim.network_components[i].component_value[0] << endl;
-			cout << "next_value=" << x[i].component_value[0] << endl;
-		}
-
-		sim.network_components = x;
+  	sim.network_components = update_source_equivalents(sim.network_components, Vvector, current_through_cmps, simulation_progress, time_step);
 
 	}
 	cout << "✅ Simulation Complete ✅" << endl << "📄 Outputs written to: " << output_file_name << endl << endl;
