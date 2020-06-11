@@ -257,7 +257,10 @@ vector<double> calculate_current_through_component(vector<component> network_com
 			current_through_I = abs(current_through_I);
 			current_column.push_back(current_through_I);
 		}
-
+		
+		if(network_component[i].component_name[0] == 'C' || network_component[i].component_name[0] == 'L'){
+			double current_through_CL = 0.0;
+			current_column.push_back(current_through_CL);
 		//!!!!! implement this for C and Ls, probably just output 0? To be decided
 	}
 
