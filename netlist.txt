@@ -1,8 +1,7 @@
 * This is a test SPICE file.
-.tran 0 10s 0 1s
+.tran 0 5s 0 1ms
 R1 0 N001 10
-I1 N001 N002 10
-R2 N002 N003 10
-V2 N003 N004 10
-R3 N004 0 20
+R2 N001 N002 10
+V2 N002 N003 SINE(10 1 1)
+R3 N003 0 20
 .end
