@@ -102,55 +102,37 @@ int which_is_the_node(vector<node> nodes_wo_ref , node input){
 	return counter;
 }
 
-//!!!!!  Here the first term in connected_terminals vector of the components is assumed to be positive, the second one is negative    !!!!!!
-/*
-//capacitors need to be replaced by voltage sources at different time steps.
-//capacitors are closed circuit in the beginning.
-independent_v_source convert_C_to_vsource(C capacitor, double simulation_progress){
+// Updates the network_components' node voltage according to the previously set values and the timestep.
+// Approximates the integral equations ==> For C: V=∫I/C    or similarly for L: I=∫V/L
+vector<component> update_source_equivalents(vector<component> network_components, double simulation_progress){
+  for(int i = 0 ; i < network_components.size(); i++){
+    if(network_components[i].component_name[0].find("I_") != string::npos || network_components[i].component_name[0].find("V_") != string::npos) {
+      // Current source (inductor equivalent) found
+      double voltage_across_component = network_components[i].connected_terminals[0].node_voltage - network_components[i].connected_terminals[1].node_voltage;
+      double source_value = (voltage_across_component / network_components[i].component_value[0])*timestep;
+      network_components[i].component_value[0]=source_value;
+    }
 
-}
-
-//inductors are open circuits in the beginning.
-//inductors need to be replaced by current sources at different time steps.
-independent_i_source convert_L_to_isource(L inductor, double simulation_progress){
-
-	//a timer is needed to produce the current_time in the simulation
-	//to use this function, u have to make sure the inductor's connected_terminals's voltages are updated after each time step
-	//when simulation starts, L should not be converted to an i source
-
-  // At the start of the simulation, no energy is stored in the inductor. It can be treated as open-circuit or a 0A current source.
-  if(simulation_progress == 0.0){
-    Ltoisource = independent_i_source("I_"+ inductor.component_name, 0.0, 0.0 ,0.0,inductor.connected_terminals);
-    return Ltoisource;
   }
-
-	double voltage_across_L = inductor.connected_terminals[0].node_voltage - inductor.connected_terminals[1].node_voltage;
-	double isource_value;
-	isource_value = (voltage_across_L / inductor.component_value[0])*timestep;
-	independent_i_source Ltoisource("I_"+ inductor.component_name, isource_value, 0.0, 0.0, inductor.connected_terminals);
-	return Ltoisource;
+  return network_components;
 }
 
+// Initialiser function, which converts all CLs to source equivalents at the start (open/closed circuit)
+vector<component> convert_CLs_to_sources(vector<component> network_components){
 
-vector<component> convert_CLs_to_sources(vector<component> network_components, double simulation_progress){
-  vector<component> output;
-  output = network_components;
   for(int i = 0 ; i < network_components.size(); i++){
     if(network_components[i].component_name[0] == "L"){
-      node node1(1);
-      node node2(2);
-      independent_i_source LtoI("np", 0.0, 0.0 , 0.0, {node1,node2});
-      LtoI = convert_L_to_isource(network_components[i], double simulation_progress);
-      output.push_back(LtoI);
+      independent_i_source equivalent_source("I_"+network_components[i].component_name, 0.0, 0.0 , 0.0, network_components[i].connected_terminals);
+      network_components[i] = equivalent_source;
+    }
+    else if(network_components[i].component_name[0] == "C"){
+      independent_v_source equivalent_source("V_"+network_components[i].component_name, 0.0, 0.0 , 0.0, network_components[i].connected_terminals);
+      network_components[i] = equivalent_source;
     }
   }
-  // For capacitors, not finished yet
-  return output;
+
+  return network_components;
 }
-*/
-//function that updates source value !!!
-
-
 
 //the following function is used to tell the currents through a V source
 //it calculates the current resulted from other components (not from the source itself) from connected_terminals[0] to connected_terminals[1]
@@ -162,7 +144,7 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 	int which_is_node1 = which_is_the_node(Vvector, input.connected_terminals[1]);
 	if(input.connected_terminals[1].index == 0){ // if input.connected_terminals[1] is not in Vvector, this is because Vvector doesn't contain the reference node.
 		for(int i = 0 ; i < Vvector[which_is_node0].connected_components.size() ; i++){
-				
+
 			if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'R' && Vvector[which_is_node0].connected_components[i].connected_terminals[0].index !=0){
 				if(Vvector[which_is_node0].connected_components[i].connected_terminals[0] == Vvector[which_is_node0]){
 					output += calculate_current_through_R(Vvector[which_is_node0].connected_components[i], Vvector);
@@ -177,11 +159,11 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 				}
 				if(Vvector[which_is_node0].connected_components[i].connected_terminals[1] == Vvector[which_is_node0]){
 					output -= Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
-	
+
 				}
 			}
 		}
-	
+
 	}else{
 		for(int c = 0; c< Vvector[which_is_node1].connected_components.size(); c++){
 			if(Vvector[which_is_node1].connected_components[c].component_name[0] == 'R'){
@@ -201,10 +183,10 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 
 				}
 			}
-	
+
 		}
 	}
-	
+
 	return output;
 }
 
@@ -223,7 +205,7 @@ double calculate_current_through_R(component R, vector<node> Vvector){
 		}
 	}
 	current_through_R = (node0voltage - node1voltage) / R.component_value[0];
-	return current_through_R;	
+	return current_through_R;
 
 }
 //the following function should take the version of network_component, where all C and Ls are converted to sources.
