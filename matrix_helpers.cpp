@@ -137,11 +137,13 @@ vector<component> convert_CLs_to_sources(vector<component> network_components){
   for(int i = 0 ; i < network_components.size(); i++){
     if(network_components[i].component_name[0] == 'L'){
       independent_i_source equivalent_source("I_"+network_components[i].component_name, 0.0, 0.0 , 0.0, network_components[i].connected_terminals);
-      network_components[i] = equivalent_source;
+      //network_components[i] = equivalent_source;
+	  network_components.push_back(equivalent_source);
     }
     else if(network_components[i].component_name[0] == 'C'){
       independent_v_source equivalent_source("V_"+network_components[i].component_name, 0.0, 0.0 , 0.0, network_components[i].connected_terminals);
-      network_components[i] = equivalent_source;
+      //network_components[i] = equivalent_source;
+	  network_components.push_back(equivalent_source);
     }
   }
 

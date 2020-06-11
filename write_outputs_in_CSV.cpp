@@ -86,9 +86,12 @@ int main(){
 	double simulation_progress = 0;
 	vector<double> current_through_cmps;
 
+
 	vector<component> networkcomponents = sim.network_components; // !!!!! This line needs to be changed after C and L are added
   // conver cl to source(networkcomponents)
-  
+ 
+	networkcomponents = convert_CLs_to_sources(networkcomponents);
+
 	MatrixXd Imatrix;
 	MatrixXd Gmatrix;
 	MatrixXd Vmatrix;
@@ -126,8 +129,10 @@ int main(){
     //function that updates the value of the sources that CLs become
     //it itrates through all components find the ones which start with "I_" or "V_".
     //change their value based on pervious condition.
-
+		
 		simulation_progress += time_step;
+	
+  		networkcomponents = update_source_equivalents(networkcomponents, Vvector, simulation_progress, time_step);
 	}
 
 }
