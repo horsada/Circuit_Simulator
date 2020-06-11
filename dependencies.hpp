@@ -21,6 +21,8 @@
 
 // Mathematical Helpers
 #include <cmath>
+#define _USE_MATH_DEFINES
+
 #include <algorithm>
 #include <Eigen/Dense> // This must be included in the compile path (g++ -I eigen/ ...)
 

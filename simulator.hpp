@@ -197,6 +197,6 @@ double calculate_current_through_R(component R, vector<node> Vvector);
 
 vector<component> convert_CLs_to_sources(vector<component> network_components);
 
-vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, double simulation_progress, double timestep);
+vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep);
 
 #endif

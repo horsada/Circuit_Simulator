@@ -85,7 +85,7 @@ int parse_netlist_line(network_simulation &netlist_network, string netlist_line)
       // Extract SINE(X Y Z) function parameters
       regex sine_paramters_pattern("[0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)? [0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)? [0-9]+([.][0-9]+)?(p|n|u|m|k|Meg|G)?");
       smatch sine_function_paramters_only;
-//      regex_search(sine_function_matches_exists.str(0), sine_function_paramters_only, sine_paramters_pattern);
+      regex_search(sine_function_matches_exists.str(0), sine_function_paramters_only, sine_paramters_pattern);
 
       string dc_offset_raw, amplitude_raw, frequency_raw;
       double dc_offset, amplitude, frequency;

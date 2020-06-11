@@ -73,8 +73,7 @@ int main(){
 			parse_netlist_line(sim, tp);
 		}
 		newfile.close();
-	}
-
+    }
 	cout << "Netlist parsing complete. Running simulation with following paramters: " << endl;
 
 	//the process of how sim is produced by using netlist paser is not done !!!!
@@ -84,7 +83,6 @@ int main(){
 	cout << "time_step=" << time_step << "; stoptime=" << stoptime << endl << endl;
 
 	double simulation_progress = 0;
-	vector<double> current_through_cmps;
 
 
 	vector<component> networkcomponents = sim.network_components; // !!!!! This line needs to be changed after C and L are added
@@ -122,7 +120,7 @@ int main(){
 		write_csv_voltage_row(output_file_name, simulation_progress, Vvector); // 3. write the node_voltage into CSV file
 
 			
-		current_through_cmps = calculate_current_through_component(networkcomponents,Vvector, simulation_progress); // 4. calculate the current through each component
+		vector<double> current_through_cmps = calculate_current_through_component(networkcomponents,Vvector, simulation_progress); // 4. calculate the current through each component
 
 		write_csv_current_row(output_file_name, current_through_cmps); // 5. write the currents into a CSV file
     
@@ -132,7 +130,7 @@ int main(){
 		
 		simulation_progress += time_step;
 	
-  		networkcomponents = update_source_equivalents(networkcomponents, Vvector, simulation_progress, time_step);
+  	networkcomponents = update_source_equivalents(networkcomponents, Vvector, current_through_cmps, simulation_progress, time_step);
 	}
 
 }

@@ -57,11 +57,11 @@ double sum_known_currents(node input, double simulation_progress) {
 		if(input.connected_components[i].component_name[0] == 'I'){
 			if(input.connected_components[i].connected_terminals[1] == input) {
 				sum_current += input.connected_components[i].component_value[0]; // add dc offset
-				sum_current += input.connected_components[i].component_value[1]* sin(input.connected_components[i].component_value[2] * simulation_progress); // add amplitude*sin(frequency*time
+				sum_current += input.connected_components[i].component_value[1]* sin(2*M_PI*input.connected_components[i].component_value[2] * simulation_progress); // add amplitude*sin(2*pi*frequency*time
 			}
 			if(input.connected_components[i].connected_terminals[0] == input) {
 				sum_current -= input.connected_components[i].component_value[0]; // subtract dc offset
-				sum_current -= input.connected_components[i].component_value[1]* sin(input.connected_components[i].component_value[2] * simulation_progress); // subtract amplitude*sin(frequency*time
+				sum_current -= input.connected_components[i].component_value[1]* sin(2*M_PI*input.connected_components[i].component_value[2] * simulation_progress); // subtract amplitude*sin(2*pi*frequency*time
 			}
 		}
 	}
@@ -104,7 +104,7 @@ int which_is_the_node(vector<node> nodes_wo_ref , node input){
 
 // Updates the network_components' node voltage according to the previously set values and the timestep.
 // Approximates the integral equations ==> For C: V=∫I/C    or similarly for L: I=∫V/L
-vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, double simulation_progress, double timestep){
+vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep){
   for(int i = 0 ; i < network_components.size(); i++){
     if(network_components[i].component_name[1] == '_') {
       // Current source (inductor equivalent) found
@@ -114,14 +114,18 @@ vector<component> update_source_equivalents(vector<component> network_components
  
 			int which_is_node0 = which_is_the_node(Vvector, network_components[i].connected_terminals[0]);
 			int which_is_node1 = which_is_the_node(Vvector, network_components[i].connected_terminals[1]);
+      
 			double voltage_across_component = Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
-			double source_value = (voltage_across_component / network_components[i].component_value[0])*timestep;
+			double source_value = (voltage_across_component / network_components[i].component_value[0])*timestep + current_through_components[i];
 			network_components[i].component_value[0]=source_value;
 		}
 
 		if(network_components[i].component_name[0] == 'V'){
+      int which_is_node0 = which_is_the_node(Vvector, network_components[i].connected_terminals[0]);
+			int which_is_node1 = which_is_the_node(Vvector, network_components[i].connected_terminals[1]);
+
 			double current_across_component = tell_currents(network_components[i], Vvector, simulation_progress);
-			double source_value = (current_across_component / network_components[i].component_value[0])*timestep;
+			double source_value = (current_across_component / network_components[i].component_value[0])*timestep + Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
 			network_components[i].component_value[0] = source_value;
 		}
 	
@@ -171,10 +175,10 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 			}
 			if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'I'){
 				if(Vvector[which_is_node0].connected_components[i].connected_terminals[0] == Vvector[which_is_node0]){
-					output += Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
+					output += Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(2*M_PI*Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
 				}
 				if(Vvector[which_is_node0].connected_components[i].connected_terminals[1] == Vvector[which_is_node0]){
-					output -= Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
+					output -= Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(2*M_PI*Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
 
 				}
 			}
@@ -192,10 +196,10 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 			}
 			if(Vvector[which_is_node1].connected_components[c].component_name[0] == 'I'){
 				if(Vvector[which_is_node1].connected_components[c].connected_terminals[0] == Vvector[which_is_node1]){
-					output -= Vvector[which_is_node1].connected_components[c].component_value[0] + Vvector[which_is_node1].connected_components[c].component_value[1]*sin(Vvector[which_is_node1].connected_components[c].component_value[2]*simulation_progress);
+					output -= Vvector[which_is_node1].connected_components[c].component_value[0] + Vvector[which_is_node1].connected_components[c].component_value[1]*sin(2*M_PI*Vvector[which_is_node1].connected_components[c].component_value[2]*simulation_progress);
 				}
 				if(Vvector[which_is_node1].connected_components[c].connected_terminals[1] == Vvector[which_is_node1]){
-					output += Vvector[which_is_node1].connected_components[c].component_value[0] + Vvector[which_is_node1].connected_components[c].component_value[1]*sin(Vvector[which_is_node1].connected_components[c].component_value[2]*simulation_progress);
+					output += Vvector[which_is_node1].connected_components[c].component_value[0] + Vvector[which_is_node1].connected_components[c].component_value[1]*sin(2*M_PI*Vvector[which_is_node1].connected_components[c].component_value[2]*simulation_progress);
 
 				}
 			}
@@ -255,7 +259,7 @@ vector<double> calculate_current_through_component(vector<component> network_com
 		//The current through I shows the current going through I from the In side to the Out side.
 		if(network_component[i].component_name[0] == 'I'){
 			double current_through_I = 0.0;
-			current_through_I = network_component[i].component_value[0] + network_component[i].component_value[1]*sin(network_component[i].component_value[2]*simulation_progress);
+			current_through_I = network_component[i].component_value[0] + network_component[i].component_value[1]*sin(2*M_PI*network_component[i].component_value[2]*simulation_progress);
 			current_through_I = abs(current_through_I);
 			current_column.push_back(current_through_I);
 		}

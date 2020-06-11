@@ -6,7 +6,6 @@ MatrixXf solve_matrix_equation(MatrixXf A, MatrixXf B) {
   return x;
 }
 
-// Testing needed
 double suffix_parser(string input) {
   // reduced spice format takes multiplier or normal float as input
 

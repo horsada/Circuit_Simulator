@@ -133,17 +133,17 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
     		//find the v source that the node is connected to
     		if(cmp.component_name[0] == 'V'){
     			double voltage;
-    			// Voltage is calculated by amplitude*sin(frequency*current time)
+    			// Voltage is calculated by amplitude*sin(2*pi*frequency*current time)
     			// Check if the positive side or the negative side of the v source is conneceted to the node
 
     			// Positive side to the node
     			if(cmp.connected_terminals[0] == unknown_nodes[i]){
-    				voltage = cmp.component_value[0] + cmp.component_value[1]*sin(cmp.component_value[2]*simulation_progress);
+    				voltage = cmp.component_value[0] + cmp.component_value[1]*sin(2*M_PI*cmp.component_value[2]*simulation_progress);
     				current_matrix(i,0) = voltage;
     			}
     			// Negative side to the node
     		  if(cmp.connected_terminals[1] == unknown_nodes[i]){
-    				voltage = 0.0 - (cmp.component_value[0] + cmp.component_value[1]*sin(cmp.component_value[2]*simulation_progress));
+    				voltage = 0.0 - (cmp.component_value[0] + cmp.component_value[1]*sin(2*M_PI*cmp.component_value[2]*simulation_progress));
             current_matrix(i,0) = voltage;
     			}
     		}
@@ -176,7 +176,7 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
           }
         }
 
-        double voltage = vsource_values[0] + vsource_values[1]*sin(vsource_values[2]*simulation_progress);
+        double voltage = vsource_values[0] + vsource_values[1]*sin(2*M_PI*vsource_values[2]*simulation_progress);
     		current_matrix(i,0) = voltage;
     	}
 
