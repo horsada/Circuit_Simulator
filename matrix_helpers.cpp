@@ -104,13 +104,13 @@ int which_is_the_node(vector<node> nodes_wo_ref , node input){
 
 // Updates the network_components' node voltage according to the previously set values and the timestep.
 // Approximates the integral equations ==> For C: V=∫I/C    or similarly for L: I=∫V/L
-vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, double simulation_progress){
+vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, double simulation_progress, double timestep){
   for(int i = 0 ; i < network_components.size(); i++){
-    if(network_components[i].component_name[0].find("I_") != string::npos || network_components[i].component_name[0].find("V_") != string::npos) {
+    if(network_components[i].component_name[1] == '_') {
       // Current source (inductor equivalent) found
 		
 		//The following part might nore work because Vvector is not one of the input parameters
-		if(network_components[i].component_name[0].find("I_") != string::npos){
+		if(network_components[i].component_name[0] == 'I') {
  
 			int which_is_node0 = which_is_the_node(Vvector, network_components[i].connected_terminals[0]);
 			int which_is_node1 = which_is_the_node(Vvector, network_components[i].connected_terminals[1]);
@@ -119,7 +119,7 @@ vector<component> update_source_equivalents(vector<component> network_components
 			network_components[i].component_value[0]=source_value;
 		}
 
-		if(network_components[i].component_name[0].find("V_") != string::npos){
+		if(network_components[i].component_name[0] == 'V'){
 			double current_across_component = tell_currents(network_components[i], Vvector, simulation_progress);
 			double source_value = (current_across_component / network_components[i].component_value[0])*timestep;
 			network_components[i].component_value[0] = source_value;
@@ -135,11 +135,11 @@ vector<component> update_source_equivalents(vector<component> network_components
 vector<component> convert_CLs_to_sources(vector<component> network_components){
 
   for(int i = 0 ; i < network_components.size(); i++){
-    if(network_components[i].component_name[0] == "L"){
+    if(network_components[i].component_name[0] == 'L'){
       independent_i_source equivalent_source("I_"+network_components[i].component_name, 0.0, 0.0 , 0.0, network_components[i].connected_terminals);
       network_components[i] = equivalent_source;
     }
-    else if(network_components[i].component_name[0] == "C"){
+    else if(network_components[i].component_name[0] == 'C'){
       independent_v_source equivalent_source("V_"+network_components[i].component_name, 0.0, 0.0 , 0.0, network_components[i].connected_terminals);
       network_components[i] = equivalent_source;
     }
@@ -262,8 +262,9 @@ vector<double> calculate_current_through_component(vector<component> network_com
 			double current_through_CL = 0.0;
 			current_column.push_back(current_through_CL);
 		//!!!!! implement this for C and Ls, probably just output 0? To be decided
+	
+		}
 	}
-
 	return current_column;
 
 }
