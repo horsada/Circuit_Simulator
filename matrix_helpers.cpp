@@ -132,40 +132,6 @@ vector<component> update_source_equivalents(vector<component> network_components
   }
   return network_components;
 }
-/*old version of updating value
-// Updates the network_components' node voltage according to the previously set values and the timestep.
-// Approximates the integral equations ==> For C: V=∫I/C    or similarly for L: I=∫V/L
-vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep){
-  for(int i = 0 ; i < network_components.size(); i++){
-    if(network_components[i].component_name[1] == '_') {
-      // Current source (inductor equivalent) found
-
-		//The following part might nore work because Vvector is not one of the input parameters
-		if(network_components[i].component_name[0] == 'I') {
-
-			int which_is_node0 = which_is_the_node(Vvector, network_components[i].connected_terminals[0]);
-			int which_is_node1 = which_is_the_node(Vvector, network_components[i].connected_terminals[1]);
-
-			double voltage_across_component = Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
-			double source_value = (voltage_across_component / network_components[i].component_value[0])*timestep + current_through_components[i];
-			network_components[i].component_value[0]=source_value;
-		}
-
-		if(network_components[i].component_name[0] == 'V'){
-      int which_is_node0 = which_is_the_node(Vvector, network_components[i].connected_terminals[0]);
-			int which_is_node1 = which_is_the_node(Vvector, network_components[i].connected_terminals[1]);
-
-			double current_across_component = tell_currents(network_components[i], Vvector, simulation_progress);
-			double source_value = (current_across_component / network_components[i].component_value[0])*timestep + Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
-			network_components[i].component_value[0] = source_value;
-		}
-
-	}
-
-  }
-  return network_components;
-}
-*/
 
 // Initialiser function, which converts all CLs to source equivalents at the start (open/closed circuit)
 vector<component> convert_CLs_to_sources(vector<component> network_components){

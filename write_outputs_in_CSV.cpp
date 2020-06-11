@@ -61,6 +61,8 @@ void write_csv_current_row(string filename, vector<double> current_cmps){
 }
 
 int main(){
+	cout << endl << endl << "ℹ️⚡️ Running Wuyang, Adam & Timeo's Circuit simulator" << endl << endl;
+	cout << "🚀🚀🚀 Starting simulation" << endl;
 
 	cout << "Netlist input: " << input_file_name << endl << "CSV Output: " << output_file_name << endl;
 	network_simulation sim;
@@ -74,7 +76,7 @@ int main(){
 		}
 		newfile.close();
     }
-	cout << "Netlist parsing complete. Running simulation with following paramters: " << endl;
+	cout << "🔄 Netlist parsing complete. Running simulation with following paramters: " << endl;
 
 	//the process of how sim is produced by using netlist paser is not done !!!!
 	double time_step = sim.timestep;
@@ -82,116 +84,59 @@ int main(){
 
 	cout << "time_step=" << time_step << "; stoptime=" << stoptime << endl << endl;
 
-	double simulation_progress = 0;
 
-	vector<component> networkcomponents = sim.network_components; // !!!!! This line needs to be changed after C and L are added
-  // conver cl to source(networkcomponents)
-
-	cout << "networkcomponents.size()=" << networkcomponents.size() << endl;
-	cout << "sim.network_components.size()=" << sim.network_components.size() << endl;
+	sim.network_components = convert_CLs_to_sources(sim.network_components);
+	vector<component> networkcomponents = sim.network_components;
 
 
-	networkcomponents = convert_CLs_to_sources(networkcomponents);
-
-	sim.network_components = {};
-	cout << "ZERO2" << endl;
-
-	MatrixXd Imatrix;
-	MatrixXd Gmatrix;
-	MatrixXd Vmatrix;
+	// The voltage vector containing unknown voltage nodes
 	vector<node> Vvector = create_v_matrix(sim);
-	// V = G.inverse() * I
-	// create the first row of the output file
+
+	// Writing the column names into the CSV file
 	write_csv_column_specifiers(output_file_name, Vvector, networkcomponents);
-	// time is increamenting
-	// at each time,
-	// 1.solve the matrix.
-	// 2.push the node_voltages into nodes
-	// 3.write the node_voltage into CSV file
-	// 4.calculate the current through each component
-	// 5.write the currents into a CSV file
+
+	/*
+		Simulation Loop
+			1 Solve the matrix equation
+			2 Write the calculated voltages to CSV
+			3 Calculate currents through components
+			4 Write currents to CSV
+			5 Update the source equivalents for inductors and capacitors
+	*/
 
 	for(double simulation_progress=0; simulation_progress<=stoptime; simulation_progress+=time_step) {
-		cout << simulation_progress << endl;
 
-		cout << "dbg1" << endl;
-		Imatrix = create_i_matrix(sim,simulation_progress);
-		cout << "dbg2" << endl;
-		Gmatrix = create_G_matrix(sim);
-		cout << "dbg3" << endl;
-		Gmatrix = Gmatrix.inverse(); //Get the inverse of the G matrix
-		cout << "dbg4" << endl;
-		Vmatrix = Gmatrix * Imatrix; // 1. solve the matrix
-		cout << "dbg5" << endl;
+		// 1 Solve the matrix equation
+		MatrixXd Imatrix = create_i_matrix(sim,simulation_progress);
+		MatrixXd Gmatrix = create_G_matrix(sim);
+		Gmatrix = Gmatrix.inverse();
+		MatrixXd Vmatrix = Gmatrix * Imatrix;
+
 		for(int i = 0 ; i < Vvector.size() ; i++){
-			Vvector[i].node_voltage = Vmatrix(i,0); // 2. pushing node_voltages into nodes
+			// Updating node_voltage values in Vvector
+			Vvector[i].node_voltage = Vmatrix(i,0);
 		}
-		cout << "dbg6" << endl;
 
+		// 2 Write the calculated voltages to CSV
+		write_csv_voltage_row(output_file_name, simulation_progress, Vvector);
 
+		// 3 Calculate currents through components
+		vector<double> current_through_cmps = calculate_current_through_component(networkcomponents, Vvector, simulation_progress);
 
-		write_csv_voltage_row(output_file_name, simulation_progress, Vvector); // 3. write the node_voltage into CSV file
-		cout << "dbg7" << endl;
+		// 4 Write currents to CSV
+		write_csv_current_row(output_file_name, current_through_cmps);
 
-		vector<double> current_through_cmps = calculate_current_through_component(networkcomponents,Vvector, simulation_progress); // 4. calculate the current through each component
-		cout << "dbg8" << endl;
+		// 5 Update the source equivalents for inductors and capacitors
+  	vector<component> x = update_source_equivalents(networkcomponents, Vvector, current_through_cmps, simulation_progress, time_step);
 
-		write_csv_current_row(output_file_name, current_through_cmps); // 5. write the currents into a CSV file
-		cout << "dbg9" << endl;
+		for(int i=0; i<sim.network_components.size(); i++) {
+			cout << "previous_value=" << sim.network_components[i].component_value[0] << endl;
+			cout << "next_value=" << x[i].component_value[0] << endl;
+		}
 
-    //function that updates the value of the sources that CLs become
-    //it itrates through all components find the ones which start with "I_" or "V_".
-    //change their value based on pervious condition.
+		sim.network_components = x;
 
-  	networkcomponents = update_source_equivalents(networkcomponents, Vvector, current_through_cmps, simulation_progress, time_step);
-
-		cout << "TEST-A" << endl;
-		sim.network_components = networkcomponents;
-		cout << "TEST-B" << endl;
 	}
+	cout << "✅ Simulation Complete ✅" << endl << "📄 Outputs written to: " << output_file_name << endl << endl;
 
 }
-
-
-
-
-/*
-
-
-Time,1,2,3,I1,R1,R2,R3
-0,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.001,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.002,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.003,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.004,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.005,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.006,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.007,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.008,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.009,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.01,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.011,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.012,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.013,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.014,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.015,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.016,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.017,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.018,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.019,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.02,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.021,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.022,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-0.023,225,175,100,5,7.43303e-317,4.95535e-317,3.71651e-317
-
-
-* This is a test SPICE file.
-.tran 0 10s 0 1ms
-I1 N001 0 5
-R1 N001 N002 10
-R2 N002 N003 15
-R3 N003 0 20
-.end
-
-
-*/
