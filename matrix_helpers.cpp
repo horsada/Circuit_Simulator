@@ -104,14 +104,28 @@ int which_is_the_node(vector<node> nodes_wo_ref , node input){
 
 // Updates the network_components' node voltage according to the previously set values and the timestep.
 // Approximates the integral equations ==> For C: V=∫I/C    or similarly for L: I=∫V/L
-vector<component> update_source_equivalents(vector<component> network_components, double simulation_progress){
+vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, double simulation_progress){
   for(int i = 0 ; i < network_components.size(); i++){
     if(network_components[i].component_name[0].find("I_") != string::npos || network_components[i].component_name[0].find("V_") != string::npos) {
       // Current source (inductor equivalent) found
-      double voltage_across_component = network_components[i].connected_terminals[0].node_voltage - network_components[i].connected_terminals[1].node_voltage;
-      double source_value = (voltage_across_component / network_components[i].component_value[0])*timestep;
-      network_components[i].component_value[0]=source_value;
-    }
+		
+		//The following part might nore work because Vvector is not one of the input parameters
+		if(network_components[i].component_name[0].find("I_") != string::npos){
+ 
+			int which_is_node0 = which_is_the_node(Vvector, network_components[i].connected_terminals[0]);
+			int which_is_node1 = which_is_the_node(Vvector, network_components[i].connected_terminals[1]);
+			double voltage_across_component = Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
+			double source_value = (voltage_across_component / network_components[i].component_value[0])*timestep;
+			network_components[i].component_value[0]=source_value;
+		}
+
+		if(network_components[i].component_name[0].find("V_") != string::npos){
+			double current_across_component = tell_currents(network_components[i], Vvector, simulation_progress);
+			double source_value = (current_across_component / network_components[i].component_value[0])*timestep;
+			network_components[i].component_value[0] = source_value;
+		}
+	
+	}
 
   }
   return network_components;
