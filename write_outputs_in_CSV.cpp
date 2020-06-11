@@ -114,7 +114,7 @@ int main(){
 			Vvector[i].node_voltage = Vmatrix(i,0); // 2. pushing node_voltages into nodes
 		}
 		
-		cout << Imatrix;
+		
 
 		write_csv_voltage_row(output_file_name, simulation_progress, Vvector); // 3. write the node_voltage into CSV file
 
@@ -129,6 +129,7 @@ int main(){
 
 		simulation_progress += time_step;
 	}
+
 }
 
 
