@@ -86,7 +86,6 @@ int main(){
 	double simulation_progress = 0;
 	vector<double> current_through_cmps;
 
-
 	vector<component> networkcomponents = sim.network_components; // !!!!! This line needs to be changed after C and L are added
   // conver cl to source(networkcomponents)
  
@@ -132,7 +131,9 @@ int main(){
 		
 		simulation_progress += time_step;
 	
-  		networkcomponents = update_source_equivalents(networkcomponents, Vvector, simulation_progress, time_step);
+  		networkcomponents = update_source_equivalents(networkcomponents, Vvector,current_through_cmps, simulation_progress, time_step);
+	
+		cout << networkcomponents[3].component_value[0];
 	}
 
 }
