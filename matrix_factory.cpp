@@ -96,6 +96,7 @@ vector<node> create_v_matrix(network_simulation A) {
 
 // This functoin constructs the current single-column matrix  (I in G*V = I)
 MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
+
   vector<node> nodes_with_ref_node = A.network_nodes;
   vector<node> unknown_nodes = create_v_matrix(A);
   node reference_node(0);
@@ -161,7 +162,6 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
         vector<double> vsource_values;
         //cout << "dbg4=" << snd.first.connected_components.size() << endl;
         // Iterate through the components of the supernode(node 1 of supernode)
-
         for(component cmp1: unknown_nodes[i].connected_components){
           //cout << "dbg5" << endl;
           // Iterate through the components of the supernode(node 2 of supernode
@@ -172,13 +172,13 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
               // The voltage source that caused the node to be classified as a supernode
               vsource_values = cmp1.component_value;
               //cout << "dbg7" << endl;
+              double voltage = vsource_values[0] + vsource_values[1]*sin(2*M_PI*vsource_values[2]*simulation_progress);
+              current_matrix(i,0) = voltage;
             }
           }
         }
-
-        double voltage = vsource_values[0] + vsource_values[1]*sin(2*M_PI*vsource_values[2]*simulation_progress);
-    		current_matrix(i,0) = voltage;
     	}
+
 
       // If it is a non-relationship supernode
     	if(unknown_nodes[i] == snd.second){

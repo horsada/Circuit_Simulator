@@ -63,7 +63,7 @@ class component {
     vector<double> component_value;
     vector<node> connected_terminals;
 
-    virtual ~component(){};
+    ~component(){};
     vector<double> read_value() const {
       return component_value;
     };

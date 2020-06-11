@@ -86,8 +86,15 @@ int main(){
 
 	vector<component> networkcomponents = sim.network_components; // !!!!! This line needs to be changed after C and L are added
   // conver cl to source(networkcomponents)
- 
+
+	cout << "networkcomponents.size()=" << networkcomponents.size() << endl;
+	cout << "sim.network_components.size()=" << sim.network_components.size() << endl;
+
+
 	networkcomponents = convert_CLs_to_sources(networkcomponents);
+
+	sim.network_components = {};
+	cout << "ZERO2" << endl;
 
 	MatrixXd Imatrix;
 	MatrixXd Gmatrix;
@@ -103,34 +110,44 @@ int main(){
 	// 3.write the node_voltage into CSV file
 	// 4.calculate the current through each component
 	// 5.write the currents into a CSV file
-	while(simulation_progress < stoptime){
 
-    
+	for(double simulation_progress=0; simulation_progress<=stoptime; simulation_progress+=time_step) {
+		cout << simulation_progress << endl;
+
+		cout << "dbg1" << endl;
 		Imatrix = create_i_matrix(sim,simulation_progress);
+		cout << "dbg2" << endl;
 		Gmatrix = create_G_matrix(sim);
+		cout << "dbg3" << endl;
 		Gmatrix = Gmatrix.inverse(); //Get the inverse of the G matrix
+		cout << "dbg4" << endl;
 		Vmatrix = Gmatrix * Imatrix; // 1. solve the matrix
+		cout << "dbg5" << endl;
 		for(int i = 0 ; i < Vvector.size() ; i++){
 			Vvector[i].node_voltage = Vmatrix(i,0); // 2. pushing node_voltages into nodes
 		}
-		
-		
+		cout << "dbg6" << endl;
+
+
 
 		write_csv_voltage_row(output_file_name, simulation_progress, Vvector); // 3. write the node_voltage into CSV file
+		cout << "dbg7" << endl;
 
-			
 		vector<double> current_through_cmps = calculate_current_through_component(networkcomponents,Vvector, simulation_progress); // 4. calculate the current through each component
+		cout << "dbg8" << endl;
 
 		write_csv_current_row(output_file_name, current_through_cmps); // 5. write the currents into a CSV file
-    
+		cout << "dbg9" << endl;
+
     //function that updates the value of the sources that CLs become
     //it itrates through all components find the ones which start with "I_" or "V_".
     //change their value based on pervious condition.
-		
-		simulation_progress += time_step;
-	
-	
-  	    networkcomponents = update_source_equivalents(networkcomponents, Vvector, current_through_cmps, simulation_progress, time_step);
+
+  	networkcomponents = update_source_equivalents(networkcomponents, Vvector, current_through_cmps, simulation_progress, time_step);
+
+		cout << "TEST-A" << endl;
+		sim.network_components = networkcomponents;
+		cout << "TEST-B" << endl;
 	}
 
 }
