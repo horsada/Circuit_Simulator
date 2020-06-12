@@ -147,7 +147,7 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
     				voltage = 0.0 - (cmp.component_value[0] + cmp.component_value[1]*sin(2*M_PI*cmp.component_value[2]*simulation_progress));
             current_matrix(i,0) = voltage;
     			}
-    		}
+    	   }
   	   }
      }
 

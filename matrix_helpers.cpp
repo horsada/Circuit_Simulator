@@ -128,6 +128,7 @@ vector<component> update_source_equivalents(vector<component> network_components
 
       	double source_value = (current_across_component / network_components[i].component_value[1])*timestep + Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
       	network_components[i].component_value[0] = source_value;
+        cout << "src_val=" << source_value << endl;
       }
 
 	  }
@@ -138,22 +139,70 @@ vector<component> update_source_equivalents(vector<component> network_components
 
 // Initialiser function, which converts all CLs to source equivalents at the start (open/closed circuit)
 // ! For an inductor/capacitor equivalent DC source, the second value is hijacked to store the capacitance or inductance.
-vector<component> convert_CLs_to_sources(vector<component> network_components){
+// vector<component> convert_CLs_to_sources(vector<component> network_components){
+//
+//   for(int i = 0 ; i < network_components.size(); i++){
+//     if(network_components[i].component_name[0] == 'L'){
+//       independent_i_source equivalent_source("I_"+network_components[i].component_name, 0.0, network_components[i].component_value[0], 0.0, network_components[i].connected_terminals);
+//       network_components[i] = equivalent_source;
+// 	    // network_components.push_back(equivalent_source);
+//     }
+//     else if(network_components[i].component_name[0] == 'C'){
+//       independent_v_source equivalent_source("V_"+network_components[i].component_name, 0.0, network_components[i].component_value[0], 0.0, network_components[i].connected_terminals);
+//       network_components[i] = equivalent_source;
+// 	    // network_components.push_back(equivalent_source);
+//     }
+//   }
+//
+//   return network_components;
+// }
+int which_is_cmp(vector<component> networkcmp, component input){
+  int out =0 ;
+  for(int i = 0 ; i < networkcmp.size(); i++){
+    if(networkcmp[i].component_name[0] == input.component_name[2] && networkcmp[i].component_name[1] == input.component_name[3]){
+      out = i;
+    }
+  }
+  return out;
+}
 
-  for(int i = 0 ; i < network_components.size(); i++){
-    if(network_components[i].component_name[0] == 'L'){
-      independent_i_source equivalent_source("I_"+network_components[i].component_name, 0.0, network_components[i].component_value[0], 0.0, network_components[i].connected_terminals);
-      network_components[i] = equivalent_source;
+void convert_CLs_to_sources(network_simulation &sim){
+
+  for(int i = 0 ; i < sim.network_components.size(); i++){
+    if(sim.network_components[i].component_name[0] == 'L'){
+      independent_i_source equivalent_source("I_"+sim.network_components[i].component_name, 0.0, sim.network_components[i].component_value[0], 0.0, sim.network_components[i].connected_terminals);
+      sim.network_components[i] = equivalent_source;
+
+      int which0 = which_is_the_node(sim.network_nodes,sim.network_components[i].connected_terminals[0]);
+      int which1 = which_is_the_node(sim.network_nodes,sim.network_components[i].connected_terminals[1]);
+
+
+      int node_cmp_idx1 = which_is_cmp(sim.network_nodes[which0].connected_components, sim.network_components[i]);
+      sim.network_nodes[which0].connected_components[node_cmp_idx1] = sim.network_components[i];
+
+      int node_cmp_idx2 = which_is_cmp(sim.network_nodes[which1].connected_components, sim.network_components[i]);
+      sim.network_nodes[which1].connected_components[node_cmp_idx2] = sim.network_components[i];
+
 	    // network_components.push_back(equivalent_source);
     }
-    else if(network_components[i].component_name[0] == 'C'){
-      independent_v_source equivalent_source("V_"+network_components[i].component_name, 0.0, network_components[i].component_value[0], 0.0, network_components[i].connected_terminals);
-      network_components[i] = equivalent_source;
+    else if(sim.network_components[i].component_name[0] == 'C'){
+      independent_v_source equivalent_source("V_"+sim.network_components[i].component_name, 0.0, sim.network_components[i].component_value[0], 0.0, sim.network_components[i].connected_terminals);
+      sim.network_components[i] = equivalent_source;
 	    // network_components.push_back(equivalent_source);
+
+      int which0 = which_is_the_node(sim.network_nodes,sim.network_components[i].connected_terminals[0]);
+      int which1 = which_is_the_node(sim.network_nodes,sim.network_components[i].connected_terminals[1]);
+
+
+      int node_cmp_idx1 = which_is_cmp(sim.network_nodes[which0].connected_components, sim.network_components[i]);
+      sim.network_nodes[which0].connected_components[node_cmp_idx1] = sim.network_components[i];
+
+      int node_cmp_idx2 = which_is_cmp(sim.network_nodes[which1].connected_components, sim.network_components[i]);
+      sim.network_nodes[which1].connected_components[node_cmp_idx2] = sim.network_components[i];
+
     }
   }
 
-  return network_components;
 }
 
 //the following function is used to tell the currents through a V source
@@ -167,7 +216,7 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 	if(input.connected_terminals[1].index == 0){ // if input.connected_terminals[1] is not in Vvector, this is because Vvector doesn't contain the reference node.
 		for(int i = 0 ; i < Vvector[which_is_node0].connected_components.size() ; i++){
 
-			if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'R'){
+			if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'R' && Vvector[which_is_node0].connected_components[i].connected_terminals[0].index !=0){
 				if(Vvector[which_is_node0].connected_components[i].connected_terminals[0] == Vvector[which_is_node0]){
 					output += calculate_current_through_R(Vvector[which_is_node0].connected_components[i], Vvector);
 				}
@@ -185,8 +234,8 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 				}
 			}
 		}
-	}
-	if(input.connected_terminals[0].index == 0){
+
+	} else {
 		for(int c = 0; c< Vvector[which_is_node1].connected_components.size(); c++){
 			if(Vvector[which_is_node1].connected_components[c].component_name[0] == 'R'){
 				if(Vvector[which_is_node1].connected_components[c].connected_terminals[0] == Vvector[which_is_node1]){
@@ -270,3 +319,72 @@ vector<double> calculate_current_through_component(vector<component> network_com
 	return current_column;
 
 }
+
+/*
+
+
+* This is a test SPICE file.
+R1 N003 N002 1k
+R2 N001 0 1k
+V1 N003 0 SINE(10 1 10k)
+L1 N002 N001 10
+.tran 0 5s 0 0.1s
+.end
+
+
+
+Time,3,2,1,R1,R2,V1,L1
+0,nan,nan,1.39063e-305,nan,1.39063e-308,nan,0
+0.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+0.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+0.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+0.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+0.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+0.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+0.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+0.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+0.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+1.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+2.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+3.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+4.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
+
+
+*/
