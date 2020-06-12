@@ -167,7 +167,7 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 	if(input.connected_terminals[1].index == 0){ // if input.connected_terminals[1] is not in Vvector, this is because Vvector doesn't contain the reference node.
 		for(int i = 0 ; i < Vvector[which_is_node0].connected_components.size() ; i++){
 
-			if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'R' && Vvector[which_is_node0].connected_components[i].connected_terminals[0].index !=0){
+			if(Vvector[which_is_node0].connected_components[i].component_name[0] == 'R'){
 				if(Vvector[which_is_node0].connected_components[i].connected_terminals[0] == Vvector[which_is_node0]){
 					output += calculate_current_through_R(Vvector[which_is_node0].connected_components[i], Vvector);
 				}
@@ -185,8 +185,8 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 				}
 			}
 		}
-
-	}else{
+	}
+	if(input.connected_terminals[0].index == 0){
 		for(int c = 0; c< Vvector[which_is_node1].connected_components.size(); c++){
 			if(Vvector[which_is_node1].connected_components[c].component_name[0] == 'R'){
 				if(Vvector[which_is_node1].connected_components[c].connected_terminals[0] == Vvector[which_is_node1]){
