@@ -19,21 +19,7 @@ class network_simulation {
     double timestep; // Temporal Resolution of simulation
     vector<component> network_components;
     vector<node> network_nodes;
-/*
-	void convert_cls_to_sources(){
-		for(int i = 0 ; i < network_components.size(); i++){
-			 if(network_components[i].component_name[0] == 'L'){
-			independent_i_source equivalent_source("I_"+network_components[i].component_name, 0.0, 0.0 , 0.0, network_components[i].connected_terminals);
-      //network_components[i] = equivalent_source;
-			network_components.push_back(equivalent_source);
-			}
-			else if(network_components[i].component_name[0] == 'C'){
-			independent_v_source equivalent_source("V_"+network_components[i].component_name, 0.0, 0.0 , 0.0, network_components[i].connected_terminals);
-      //network_components[i] = equivalent_source;
-			network_components.push_back(equivalent_source);
-			}
-		}
-*/
+    map<string, double> cl_values; // maps source equivalent name to originl inductance/capacitance
 };
 
 
@@ -208,7 +194,7 @@ double calculate_current_through_R(component R, vector<node> Vvector);
 
 void convert_CLs_to_sources(network_simulation &sim);
 
-vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep);
+vector<component> update_source_equivalents(network_simulation &sim, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep);
 
 int which_is_cmp(vector<component> networkcmp, component input);
 

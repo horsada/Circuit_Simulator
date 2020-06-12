@@ -92,28 +92,58 @@ vector<pair<node,node>> supernode_separation(vector<component> components, node 
 }
 
 int which_is_the_node(vector<node> nodes_wo_ref , node input){
-
-	int counter = 0;
 	for(int i = 0; i < nodes_wo_ref.size(); i++){
 		if(nodes_wo_ref[i] == input){
-			counter = i;
+			return i;
 		}
 	}
-	return counter;
+  // Node not found. Must be reference.
+  return -1;
 }
 
-vector<component> update_source_equivalents(vector<component> network_components, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep){
+int which_is_cmp(vector<component> networkcmp, component input){
+  for(int i = 0 ; i < networkcmp.size(); i++){
+    if(networkcmp[i].component_name[0] == input.component_name[2] && networkcmp[i].component_name[1] == input.component_name[3]){
+      return i;
+    }
+  }
+  // Component not found.
+  return -1;
+}
+
+vector<component> update_source_equivalents(network_simulation &sim, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep){
+
+  vector<component> network_components = sim.network_components;
 
   for(int i = 0 ; i < network_components.size(); i++){
     if(network_components[i].component_name[1] == '_') {
 
+      // The node voltages with a 0 current source are correct. However, they seem wrong here.
       if(network_components[i].component_name[0] == 'I') {
       	int which_is_node0 = which_is_the_node(Vvector, network_components[i].connected_terminals[0]);
       	int which_is_node1 = which_is_the_node(Vvector, network_components[i].connected_terminals[1]);
 
-      	double voltage_across_component = Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
-      	double source_value = (voltage_across_component / network_components[i].component_value[1])*timestep + current_through_components[i];
+        double voltage_across_component;
+        if(which_is_node0 != -1) {
+          voltage_across_component = Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
+        } else if(which_is_node0==-1) {
+          voltage_across_component = 0 - Vvector[which_is_node1].node_voltage;
+        } else if(which_is_node1==-1) {
+          voltage_across_component = Vvector[which_is_node0].node_voltage - 0;
+        } else {
+          voltage_across_component = 0.0;
+        }
+
+        cout << "V(N00" << Vvector[which_is_node0].index << ")=" << Vvector[which_is_node0].node_voltage << endl;
+        cout << "V(N00" << Vvector[which_is_node1].index << ")=" << Vvector[which_is_node1].node_voltage << endl;
+        cout << "v_across=" << voltage_across_component << endl;
+        cout << "inductance=" << sim.cl_values[network_components[i].component_name] << endl;
+
+      	double source_value = (voltage_across_component / sim.cl_values[network_components[i].component_name])*timestep + current_through_components[i];
         network_components[i].component_value[0]=source_value;
+
+        cout << "src_val=" << source_value << endl;
+
       }
 
       if(network_components[i].component_name[0] == 'V'){
@@ -122,13 +152,10 @@ vector<component> update_source_equivalents(vector<component> network_components
 
       	double current_across_component = tell_currents(network_components[i], Vvector, simulation_progress);
 
-        cout << "i_across=" << current_across_component << endl;
-        cout << "v_across=" << Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage << endl;
-        cout << "capacitance=" << network_components[i].component_value[1] << endl;
-
-      	double source_value = (current_across_component / network_components[i].component_value[1])*timestep + Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
+        cout << "capacitance=" << sim.cl_values[network_components[i].component_name] << endl;
+      	double source_value = (current_across_component / sim.cl_values[network_components[i].component_name])*timestep + Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
       	network_components[i].component_value[0] = source_value;
-        cout << "src_val=" << source_value << endl;
+
       }
 
 	  }
@@ -137,40 +164,15 @@ vector<component> update_source_equivalents(vector<component> network_components
   return network_components;
 }
 
-// Initialiser function, which converts all CLs to source equivalents at the start (open/closed circuit)
-// ! For an inductor/capacitor equivalent DC source, the second value is hijacked to store the capacitance or inductance.
-// vector<component> convert_CLs_to_sources(vector<component> network_components){
-//
-//   for(int i = 0 ; i < network_components.size(); i++){
-//     if(network_components[i].component_name[0] == 'L'){
-//       independent_i_source equivalent_source("I_"+network_components[i].component_name, 0.0, network_components[i].component_value[0], 0.0, network_components[i].connected_terminals);
-//       network_components[i] = equivalent_source;
-// 	    // network_components.push_back(equivalent_source);
-//     }
-//     else if(network_components[i].component_name[0] == 'C'){
-//       independent_v_source equivalent_source("V_"+network_components[i].component_name, 0.0, network_components[i].component_value[0], 0.0, network_components[i].connected_terminals);
-//       network_components[i] = equivalent_source;
-// 	    // network_components.push_back(equivalent_source);
-//     }
-//   }
-//
-//   return network_components;
-// }
-int which_is_cmp(vector<component> networkcmp, component input){
-  int out =0 ;
-  for(int i = 0 ; i < networkcmp.size(); i++){
-    if(networkcmp[i].component_name[0] == input.component_name[2] && networkcmp[i].component_name[1] == input.component_name[3]){
-      out = i;
-    }
-  }
-  return out;
-}
+
 
 void convert_CLs_to_sources(network_simulation &sim){
 
   for(int i = 0 ; i < sim.network_components.size(); i++){
     if(sim.network_components[i].component_name[0] == 'L'){
-      independent_i_source equivalent_source("I_"+sim.network_components[i].component_name, 0.0, sim.network_components[i].component_value[0], 0.0, sim.network_components[i].connected_terminals);
+      sim.cl_values.insert(make_pair("I_"+sim.network_components[i].component_name, sim.network_components[i].component_value[0]));
+
+      independent_i_source equivalent_source("I_"+sim.network_components[i].component_name, 0.0, 0.0, 0.0, sim.network_components[i].connected_terminals);
       sim.network_components[i] = equivalent_source;
 
       int which0 = which_is_the_node(sim.network_nodes,sim.network_components[i].connected_terminals[0]);
@@ -186,7 +188,9 @@ void convert_CLs_to_sources(network_simulation &sim){
 	    // network_components.push_back(equivalent_source);
     }
     else if(sim.network_components[i].component_name[0] == 'C'){
-      independent_v_source equivalent_source("V_"+sim.network_components[i].component_name, 0.0, sim.network_components[i].component_value[0], 0.0, sim.network_components[i].connected_terminals);
+      sim.cl_values.insert(make_pair("V_"+sim.network_components[i].component_name, sim.network_components[i].component_value[0]));
+
+      independent_v_source equivalent_source("V_"+sim.network_components[i].component_name, 0.0, 0.0, 0.0, sim.network_components[i].connected_terminals);
       sim.network_components[i] = equivalent_source;
 	    // network_components.push_back(equivalent_source);
 
@@ -230,7 +234,6 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 				}
 				if(Vvector[which_is_node0].connected_components[i].connected_terminals[1] == Vvector[which_is_node0]){
 					output -= Vvector[which_is_node0].connected_components[i].component_value[0] + Vvector[which_is_node0].connected_components[i].component_value[1]*sin(2*M_PI*Vvector[which_is_node0].connected_components[i].component_value[2]*simulation_progress);
-
 				}
 			}
 		}
@@ -251,7 +254,6 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 				}
 				if(Vvector[which_is_node1].connected_components[c].connected_terminals[1] == Vvector[which_is_node1]){
 					output += Vvector[which_is_node1].connected_components[c].component_value[0] + Vvector[which_is_node1].connected_components[c].component_value[1]*sin(2*M_PI*Vvector[which_is_node1].connected_components[c].component_value[2]*simulation_progress);
-
 				}
 			}
 
@@ -260,6 +262,7 @@ double tell_currents(component input, vector<node> Vvector, double simulation_pr
 
 	return output;
 }
+
 
 double calculate_current_through_R(component R, vector<node> Vvector){
 	//the function calculates the current through R by using the node voltage difference across it divided by R value
@@ -295,7 +298,7 @@ vector<double> calculate_current_through_component(vector<component> network_com
 		if(network_component[i].component_name[0] == 'R'){
 			double current_through_R = 0.0;
 			current_through_R = calculate_current_through_R(network_component[i], Vvector);
-			current_through_R = abs(current_through_R);
+			// current_through_R = abs(current_through_R);
 			current_column.push_back(current_through_R);
 		}
 
@@ -319,72 +322,3 @@ vector<double> calculate_current_through_component(vector<component> network_com
 	return current_column;
 
 }
-
-/*
-
-
-* This is a test SPICE file.
-R1 N003 N002 1k
-R2 N001 0 1k
-V1 N003 0 SINE(10 1 10k)
-L1 N002 N001 10
-.tran 0 5s 0 0.1s
-.end
-
-
-
-Time,3,2,1,R1,R2,V1,L1
-0,nan,nan,1.39063e-305,nan,1.39063e-308,nan,0
-0.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-0.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-0.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-0.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-0.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-0.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-0.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-0.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-0.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-1.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-2.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-3.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4.1,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4.2,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4.3,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4.4,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4.5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4.6,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4.7,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4.8,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-4.9,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-5,nan,nan,1.39063e-305,nan,1.39063e-308,nan,nan
-
-
-*/

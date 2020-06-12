@@ -17,6 +17,7 @@
 #include <cassert>
 #include <type_traits>
 #include <typeinfo>
+#include <map>
 
 
 // Mathematical Helpers

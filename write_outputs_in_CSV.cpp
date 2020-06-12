@@ -14,7 +14,7 @@ void write_csv_column_specifiers(string filename, vector<node> nodes, vector<com
 
 	//this function writes a CSV file with node_index and component names at the top of each column
 	ofstream ofs;
-	ofs.open(filename, ios_base::app);
+	ofs.open(filename);
 
 	ofs << "Time" << "," ;
 	for(node nd: nodes){
@@ -84,45 +84,15 @@ int main(){
 
 	cout << "time_step=" << time_step << "; stoptime=" << stoptime << endl << endl;
 
+
+	// Converting conductors and capacitors to their source equivalents
+	convert_CLs_to_sources(sim);
+
 	// The voltage vector containing unknown voltage nodes
 	vector<node> Vvector = create_v_matrix(sim);
 
 	// Writing the column names into the CSV file; This happens before C/L are converted to sources.
 	write_csv_column_specifiers(output_file_name, Vvector, sim.network_components);
-
-	cout << "BY COMPONENT" << endl;
-	// Check sim object contents
-	for(component cmp: sim.network_components) {
-		for(node nd: cmp.connected_terminals) {
-			cout << "CMP=" << cmp.component_name << "; ND=" << nd.index << endl;
-		}
-	}
-
-	cout << "BY NODE" << endl;
-	for(node nd: sim.network_nodes) {
-		for(component cmp: nd.connected_components) {
-			cout << "CMP=" << cmp.component_name << "; ND=" << nd.index << endl;
-		}
-	}
-
-	cout << "SOURCE CONVERSION !!!" << endl;
-	// Converting conductors and capacitors to their source equivalents
-	convert_CLs_to_sources(sim);
-
-	cout << "BY COMPONENT" << endl;
-	// Check sim object contents
-	for(component cmp: sim.network_components) {
-		for(node nd: cmp.connected_terminals) {
-			cout << "CMP=" << cmp.component_name << "; ND=" << nd.index << endl;
-		}
-	}
-
-	cout << "BY NODE" << endl;
-	for(node nd: sim.network_nodes) {
-		for(component cmp: nd.connected_components) {
-			cout << "CMP=" << cmp.component_name << "; ND=" << nd.index << endl;
-		}
-	}
 
 
   //find the equivalent sources in sim.network_components
@@ -161,56 +131,10 @@ int main(){
 		write_csv_current_row(output_file_name, current_through_cmps);
 
 		// 5 Update the source equivalents for inductors and capacitors
-  	sim.network_components = update_source_equivalents(sim.network_components, Vvector, current_through_cmps, simulation_progress, time_step);
+  	sim.network_components = update_source_equivalents(sim, Vvector, current_through_cmps, simulation_progress, time_step);
 
 	}
-
-
 
 	cout << "✅ Simulation Complete ✅" << endl << "📄 Outputs written to: " << output_file_name << endl << endl;
 	return 0;
 }
-
-
-/*
-BY COMPONENT
-CMP=R1; ND=3
-CMP=R1; ND=2
-CMP=R2; ND=1
-CMP=R2; ND=0
-CMP=V1; ND=3
-CMP=V1; ND=0
-CMP=L1; ND=2
-CMP=L1; ND=1
-BY NODE
-CMP=R1; ND=3
-CMP=V1; ND=3
-CMP=R1; ND=2
-CMP=L1; ND=2
-CMP=R2; ND=1
-CMP=L1; ND=1
-CMP=R2; ND=0
-CMP=V1; ND=0
-SOURCE CONVERSION !!!
-BY COMPONENT
-CMP=R1; ND=3
-CMP=R1; ND=2
-CMP=R2; ND=1
-CMP=R2; ND=0
-CMP=V1; ND=3
-CMP=V1; ND=0
-CMP=I_L1; ND=2
-CMP=I_L1; ND=1
-BY NODE
-CMP=R1; ND=3
-CMP=V1; ND=3
-CMP=I_L1; ND=2
-CMP=L1; ND=2
-CMP=I_L1; ND=1
-CMP=L1; ND=1
-CMP=R2; ND=0
-CMP=V1; ND=0
-
-
-
-*/
