@@ -144,16 +144,25 @@ void update_source_equivalents(network_simulation &sim, vector<node> Vvector, ve
         } else {
           voltage_across_component = 0.0;
         }
+ 
+ //       cout << "V(N00" << Vvector[which_is_node0].index << ")=" << Vvector[which_is_node0].node_voltage << endl;
+   //     cout << "V(N00" << Vvector[which_is_node1].index << ")=" << Vvector[which_is_node1].node_voltage << endl;
+     //   cout << "v_across=" << voltage_across_component << endl;
+       // cout << "inductance=" << sim.cl_values[sim.network_components[i].component_name] << endl;
 
-        cout << "V(N00" << Vvector[which_is_node0].index << ")=" << Vvector[which_is_node0].node_voltage << endl;
-        cout << "V(N00" << Vvector[which_is_node1].index << ")=" << Vvector[which_is_node1].node_voltage << endl;
-        cout << "v_across=" << voltage_across_component << endl;
-        cout << "inductance=" << sim.cl_values[sim.network_components[i].component_name] << endl;
+        sim.network_components[i].component_value[0]=(voltage_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + sim.network_components[i].component_value[0];
+		independent_i_source equivalent_source(sim.network_components[i].component_name, sim.network_components[i].component_value[0], 0.0, 0.0, sim.network_components[i].connected_terminals);
+		sim.network_components[i] = equivalent_source;
 
-      	double source_value = (voltage_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + current_through_components[i];
-        sim.network_components[i].component_value[0]=source_value;
+ 		int which0  = which_is_the_node(sim.network_nodes, sim.network_components[i].connected_terminals[0]);
+        int which1  = which_is_the_node(sim.network_nodes, sim.network_components[i].connected_terminals[1]);
+		int node_cmp_idx1 = which_is_cmp1(sim.network_nodes[which0].connected_components, sim.network_components[i]);
+        sim.network_nodes[which0].connected_components[node_cmp_idx1] = equivalent_source;
 
-        cout << "src_val=" << source_value << endl;
+        int node_cmp_idx2 = which_is_cmp1(sim.network_nodes[which1].connected_components, sim.network_components[i]);
+        sim.network_nodes[which1].connected_components[node_cmp_idx2] = equivalent_source;
+
+      //  cout << "src_val=" << source_value << endl;
 
       }
 
