@@ -7,14 +7,21 @@
 
 **To install the Eigen library, clone it into the repositories root directory:**
 
-      git clone https://gitlab.com/libeigen/eigen.git
+    git clone https://gitlab.com/libeigen/eigen.git
 
-**Example compilation (add files as necessary):**
+**Compilation command:**
 
-    g++ -I eigen/ -std=c++11 helper_functions.cpp test_sandbox.cpp netlist_parser.cpp -o compiled_test
+	g++ -I eigen/ -std=c++11 matrix_helpers.cpp matrix_factory.cpp netlist_parser_helpers.cpp netlist_parser.cpp write_outputs_in_CSV.cpp -o current_test
 
 For every compilation, name the output file extension .out, to ensure they are ignored by source control.
 
+The input netlist file is called 
+	
+	netlist.txt
+
+The output csv file is called 
+
+	output.csv
 
 For calculating the inverse of a matrix by using Eigen library, do
 
