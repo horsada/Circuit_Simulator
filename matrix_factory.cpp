@@ -168,7 +168,7 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
           int which = which_is_the_node(unknown_nodes, snd.second);
           for(component cmp2: unknown_nodes[which].connected_components){
             //cout << "dbg6" << endl;
-            if(cmp1 == cmp2 && cmp1.component_name[0] == 'V' && cmp2.component_name[0] == 'V'){
+            if(cmp1.component_name == cmp2.component_name){
               // The voltage source that caused the node to be classified as a supernode
               vsource_values = cmp1.component_value;
               //cout << "dbg7" << endl;

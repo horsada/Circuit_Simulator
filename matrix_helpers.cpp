@@ -111,17 +111,28 @@ int which_is_cmp(vector<component> networkcmp, component input){
   return -1;
 }
 
-vector<component> update_source_equivalents(network_simulation &sim, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep){
+int which_is_cmp1(vector<component> networkcmp, component input){
+     for(int i = 0 ; i < networkcmp.size(); i++){
+       if(networkcmp[i].component_name == input.component_name){
+         return i;
+       }
+     }
+     // Component not found.
+     return -1;
+   
+}
 
-  vector<component> network_components = sim.network_components;
+void update_source_equivalents(network_simulation &sim, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep){
 
-  for(int i = 0 ; i < network_components.size(); i++){
-    if(network_components[i].component_name[1] == '_') {
+//  vector<component> network_components = sim.network_components;
+
+  for(int i = 0 ; i < sim.network_components.size(); i++){
+    if(sim.network_components[i].component_name[1] == '_') {
 
       // The node voltages with a 0 current source are correct. However, they seem wrong here.
-      if(network_components[i].component_name[0] == 'I') {
-      	int which_is_node0 = which_is_the_node(Vvector, network_components[i].connected_terminals[0]);
-      	int which_is_node1 = which_is_the_node(Vvector, network_components[i].connected_terminals[1]);
+      if(sim.network_components[i].component_name[0] == 'I') {
+      	int which_is_node0 = which_is_the_node(Vvector, sim.network_components[i].connected_terminals[0]);
+      	int which_is_node1 = which_is_the_node(Vvector, sim.network_components[i].connected_terminals[1]);
 
         double voltage_across_component;
         if(which_is_node0 != -1) {
@@ -137,31 +148,44 @@ vector<component> update_source_equivalents(network_simulation &sim, vector<node
         cout << "V(N00" << Vvector[which_is_node0].index << ")=" << Vvector[which_is_node0].node_voltage << endl;
         cout << "V(N00" << Vvector[which_is_node1].index << ")=" << Vvector[which_is_node1].node_voltage << endl;
         cout << "v_across=" << voltage_across_component << endl;
-        cout << "inductance=" << sim.cl_values[network_components[i].component_name] << endl;
+        cout << "inductance=" << sim.cl_values[sim.network_components[i].component_name] << endl;
 
-      	double source_value = (voltage_across_component / sim.cl_values[network_components[i].component_name])*timestep + current_through_components[i];
-        network_components[i].component_value[0]=source_value;
+      	double source_value = (voltage_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + current_through_components[i];
+        sim.network_components[i].component_value[0]=source_value;
 
         cout << "src_val=" << source_value << endl;
 
       }
 
-      if(network_components[i].component_name[0] == 'V'){
-        int which_is_node0 = which_is_the_node(Vvector, network_components[i].connected_terminals[0]);
-      	int which_is_node1 = which_is_the_node(Vvector, network_components[i].connected_terminals[1]);
+      if(sim.network_components[i].component_name[0] == 'V'){
+		
+ 		int which_is_node0 = which_is_the_node(Vvector, sim.network_components[i].connected_terminals[0]);
+      	int which_is_node1 = which_is_the_node(Vvector, sim.network_components[i].connected_terminals[1]);
 
-      	double current_across_component = tell_currents(network_components[i], Vvector, simulation_progress);
+      	double current_across_component = tell_currents(sim.network_components[i], Vvector, simulation_progress);
+		
+      	//double source_value = (current_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + source_value;
+		sim.network_components[i].component_value[0] = (current_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + sim.network_components[i].component_value[0];
+	  
+		independent_v_source equivalent_source(sim.network_components[i].component_name, sim.network_components[i].component_value[0], 0.0, 0.0, sim.network_components[i].connected_terminals);
 
-        cout << "capacitance=" << sim.cl_values[network_components[i].component_name] << endl;
-      	double source_value = (current_across_component / sim.cl_values[network_components[i].component_name])*timestep + Vvector[which_is_node0].node_voltage - Vvector[which_is_node1].node_voltage;
-      	network_components[i].component_value[0] = source_value;
 
-      }
+		sim.network_components[i] = equivalent_source;
+ 
+		int which0  = which_is_the_node(sim.network_nodes, sim.network_components[i].connected_terminals[0]);
+		int which1  = which_is_the_node(sim.network_nodes, sim.network_components[i].connected_terminals[1]);
+		int node_cmp_idx1 = which_is_cmp1(sim.network_nodes[which0].connected_components, sim.network_components[i]);
+        sim.network_nodes[which0].connected_components[node_cmp_idx1] = equivalent_source;
+		
+        int node_cmp_idx2 = which_is_cmp1(sim.network_nodes[which1].connected_components, sim.network_components[i]);
+        sim.network_nodes[which1].connected_components[node_cmp_idx2] = equivalent_source;
+		
+		}
 
-	  }
+	 }
 
   }
-  return network_components;
+  //return network_components;
 }
 
 

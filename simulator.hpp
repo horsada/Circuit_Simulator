@@ -194,9 +194,9 @@ double calculate_current_through_R(component R, vector<node> Vvector);
 
 void convert_CLs_to_sources(network_simulation &sim);
 
-vector<component> update_source_equivalents(network_simulation &sim, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep);
+void update_source_equivalents(network_simulation &sim, vector<node> Vvector, vector<double> current_through_components, double simulation_progress, double timestep);
 
 int which_is_cmp(vector<component> networkcmp, component input);
 
-
+int which_is_cmp1(vector<component> networkcmp, component input);
 #endif

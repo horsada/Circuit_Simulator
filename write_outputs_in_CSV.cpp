@@ -121,6 +121,7 @@ int main(){
 			Vvector[i].node_voltage = Vmatrix(i,0);
 		}
 
+		
 		// 2 Write the calculated voltages to CSV
 		write_csv_voltage_row(output_file_name, simulation_progress, Vvector);
 
@@ -131,10 +132,16 @@ int main(){
 		write_csv_current_row(output_file_name, current_through_cmps);
 
 		// 5 Update the source equivalents for inductors and capacitors
-  	sim.network_components = update_source_equivalents(sim, Vvector, current_through_cmps, simulation_progress, time_step);
+		update_source_equivalents(sim, Vvector, current_through_cmps, simulation_progress, time_step);
 
 	}
 
+	MatrixXd Imatrix = create_i_matrix(sim,stoptime); 
+	MatrixXd Gmatrix = create_G_matrix(sim);
+
+	cout<< Gmatrix;
+
+	cout<< endl << Imatrix;
 	cout << "✅ Simulation Complete ✅" << endl << "📄 Outputs written to: " << output_file_name << endl << endl;
 	return 0;
 }
