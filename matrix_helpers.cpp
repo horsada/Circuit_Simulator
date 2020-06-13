@@ -165,8 +165,7 @@ void update_source_equivalents(network_simulation &sim, vector<node> Vvector, ve
       	double current_across_component = tell_currents(sim.network_components[i], Vvector, simulation_progress);
 		
       	//double source_value = (current_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + source_value;
-		sim.network_components[i].component_value[0] = (current_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + sim.network_components[i].component_value[0];
-	  
+		sim.network_components[i].component_value[0] = (-current_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + sim.network_components[i].component_value[0];
 		independent_v_source equivalent_source(sim.network_components[i].component_name, sim.network_components[i].component_value[0], 0.0, 0.0, sim.network_components[i].connected_terminals);
 
 
