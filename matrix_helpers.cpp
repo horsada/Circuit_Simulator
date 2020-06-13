@@ -145,10 +145,6 @@ void update_source_equivalents(network_simulation &sim, vector<node> Vvector, ve
           voltage_across_component = 0.0;
         }
  
- //       cout << "V(N00" << Vvector[which_is_node0].index << ")=" << Vvector[which_is_node0].node_voltage << endl;
-   //     cout << "V(N00" << Vvector[which_is_node1].index << ")=" << Vvector[which_is_node1].node_voltage << endl;
-     //   cout << "v_across=" << voltage_across_component << endl;
-       // cout << "inductance=" << sim.cl_values[sim.network_components[i].component_name] << endl;
 
         sim.network_components[i].component_value[0]=(voltage_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + sim.network_components[i].component_value[0];
 		independent_i_source equivalent_source(sim.network_components[i].component_name, sim.network_components[i].component_value[0], 0.0, 0.0, sim.network_components[i].connected_terminals);
@@ -162,7 +158,6 @@ void update_source_equivalents(network_simulation &sim, vector<node> Vvector, ve
         int node_cmp_idx2 = which_is_cmp1(sim.network_nodes[which1].connected_components, sim.network_components[i]);
         sim.network_nodes[which1].connected_components[node_cmp_idx2] = equivalent_source;
 
-      //  cout << "src_val=" << source_value << endl;
 
       }
 
@@ -173,7 +168,6 @@ void update_source_equivalents(network_simulation &sim, vector<node> Vvector, ve
 
       	double current_across_component = tell_currents(sim.network_components[i], Vvector, simulation_progress);
 		
-      	//double source_value = (current_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + source_value;
 		sim.network_components[i].component_value[0] = (-current_across_component / sim.cl_values[sim.network_components[i].component_name])*timestep + sim.network_components[i].component_value[0];
 		independent_v_source equivalent_source(sim.network_components[i].component_name, sim.network_components[i].component_value[0], 0.0, 0.0, sim.network_components[i].connected_terminals);
 
@@ -193,7 +187,6 @@ void update_source_equivalents(network_simulation &sim, vector<node> Vvector, ve
 	 }
 
   }
-  //return network_components;
 }
 
 
@@ -217,14 +210,12 @@ void convert_CLs_to_sources(network_simulation &sim){
       int node_cmp_idx2 = which_is_cmp(sim.network_nodes[which1].connected_components, sim.network_components[i]);
       sim.network_nodes[which1].connected_components[node_cmp_idx2] = sim.network_components[i];
 
-	    // network_components.push_back(equivalent_source);
     }
     else if(sim.network_components[i].component_name[0] == 'C'){
       sim.cl_values.insert(make_pair("V_"+sim.network_components[i].component_name, sim.network_components[i].component_value[0]));
 
       independent_v_source equivalent_source("V_"+sim.network_components[i].component_name, 0.0, 0.0, 0.0, sim.network_components[i].connected_terminals);
       sim.network_components[i] = equivalent_source;
-	    // network_components.push_back(equivalent_source);
 
       int which0 = which_is_the_node(sim.network_nodes,sim.network_components[i].connected_terminals[0]);
       int which1 = which_is_the_node(sim.network_nodes,sim.network_components[i].connected_terminals[1]);
@@ -330,7 +321,6 @@ vector<double> calculate_current_through_component(vector<component> network_com
 		if(network_component[i].component_name[0] == 'R'){
 			double current_through_R = 0.0;
 			current_through_R = calculate_current_through_R(network_component[i], Vvector);
-			// current_through_R = abs(current_through_R);
 			current_column.push_back(current_through_R);
 		}
 
@@ -338,7 +328,6 @@ vector<double> calculate_current_through_component(vector<component> network_com
 		if(network_component[i].component_name[0] == 'V'){
 			double current_through_V = 0.0;
 			current_through_V = tell_currents(network_component[i],Vvector, simulation_progress);
-			// current_through_V = abs(current_through_V);
 			current_column.push_back(current_through_V);
 		}
 
@@ -346,7 +335,6 @@ vector<double> calculate_current_through_component(vector<component> network_com
 		if(network_component[i].component_name[0] == 'I'){
 			double current_through_I = 0.0;
 			current_through_I = network_component[i].component_value[0] + network_component[i].component_value[1]*sin(2*M_PI*network_component[i].component_value[2]*simulation_progress);
-			// current_through_I = abs(current_through_I);
 			current_column.push_back(current_through_I);
 		}
 

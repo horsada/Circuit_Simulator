@@ -37,51 +37,6 @@ double calculate_conductance_between_nodes(node A, node B) {
     return -sum_conductance(common_components_between_AB);
 }
 
-//
-// // Not working
-// MatrixXd create_G_matrix(network_simulation A) {
-//
-// 	//diagonal part of matrix G
-// 	MatrixXd G(A.network_nodes.size(), A.network_nodes.size());
-// 	for(int i=0; i<G.rows(); i++)
-// 	{
-// 		for(int j=0;j<G.columns(); j++)
-// 		{
-//       if(is_a_node_voltage_known(A.network_nodes[i], A.network_nodes[0]) == true)
-//       {
-//         if(i == j)
-//         {
-//           G(i,j) = 1;
-//         }
-//         else()
-//         {
-//           G(i,j) = 0;
-//         }
-//       }
-//       else if(r_two_nodes_supernodes(A.network_nodes[i], A.network_nodes[j], A.network_nodes[0]) == true)
-//       {
-//         if(A.network_nodes[i].index == i && A.network_nodes[j].index == j)
-//         {
-//           G(i,j) = voltage_at_supernode(A.network_nodes[i], A.network_nodes[j])
-//         }
-//         else if(A.network_nodes[i].index == i && A.network_nodes[j].index != j)
-//         {
-//
-//         }
-//       }
-// 			else if(i == j)
-// 			{
-// 				G(i,j) = sum_of_conductances(A.network_nodes[i], A);
-// 			}
-// 			else()
-// 			{
-// 				G(i,j) = conductance_between_nodes(A.network_nodes[i], A.network_nodes[j], A);
-// 			}
-// 		}
-// 	}
-// 	return G;
-//
-// }
 
 
 vector<node> create_v_matrix(network_simulation A) {
@@ -116,10 +71,6 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
   //this does supernodes separation, it finds supernodes, separate them into a pair of nodes, relationship node and non-relationship node
   vector<pair<node,node>> supernodes = supernode_separation(A.network_components, reference_node);
 
-  // for(int a=0 ; a < A.network_components.size(); a++){
-  //   cout << "index is = " << a << endl;
-  //   cout << "isthiszero=" << A.network_components[a].connected_terminals[0].connected_components.size() << endl;
-  // }
 
   // The for loop checks all the nodes and pushes value into the matrix according to different situations.
   for(int i = 0; i < unknown_nodes.size(); i++) {
@@ -158,20 +109,15 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
 
       // If the current node is a supernode
     	if(unknown_nodes[i] == snd.first){
-        //cout << "node-relationship entry" << endl;
         vector<double> vsource_values;
-        //cout << "dbg4=" << snd.first.connected_components.size() << endl;
         // Iterate through the components of the supernode(node 1 of supernode)
         for(component cmp1: unknown_nodes[i].connected_components){
-          //cout << "dbg5" << endl;
           // Iterate through the components of the supernode(node 2 of supernode
           int which = which_is_the_node(unknown_nodes, snd.second);
           for(component cmp2: unknown_nodes[which].connected_components){
-            //cout << "dbg6" << endl;
             if(cmp1.component_name == cmp2.component_name){
               // The voltage source that caused the node to be classified as a supernode
               vsource_values = cmp1.component_value;
-              //cout << "dbg7" << endl;
               double voltage = vsource_values[0] + vsource_values[1]*sin(2*M_PI*vsource_values[2]*simulation_progress);
               current_matrix(i,0) = voltage;
             }
@@ -182,7 +128,6 @@ MatrixXd create_i_matrix(network_simulation A, double simulation_progress) {
 
       // If it is a non-relationship supernode
     	if(unknown_nodes[i] == snd.second){
-        //cout << "non-relationship summed current entry" << endl;
     	  // return the sum of I sources going out of the node if the supernode
     		double current = 0.0;
     		//add the current going out of the first super node

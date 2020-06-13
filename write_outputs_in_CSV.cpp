@@ -78,7 +78,6 @@ int main(){
     }
 	cout << "🔄 Netlist parsing complete. Running simulation with following paramters: ";
 
-	//the process of how sim is produced by using netlist paser is not done !!!!
 	double time_step = sim.timestep;
 	double stoptime = sim.stop_time;
 
@@ -136,12 +135,6 @@ int main(){
 
 	}
 
-	MatrixXd Imatrix = create_i_matrix(sim,stoptime); 
-	MatrixXd Gmatrix = create_G_matrix(sim);
-
-	cout<< Gmatrix;
-
-	cout<< endl << Imatrix;
 	cout << "✅ Simulation Complete ✅" << endl << "📄 Outputs written to: " << output_file_name << endl << endl;
 	return 0;
 }
