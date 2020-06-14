@@ -23,6 +23,8 @@ The output csv file is called
 
 	output.csv
 
+After the derired circuit is written in netlist.txt, run ./current_test to write the outputs into output.csv.
+
 For calculating the inverse of a matrix by using Eigen library, do
 
 	G = G.inverse(); // assuming A to be a declared matrix
